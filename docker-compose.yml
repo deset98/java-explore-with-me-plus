@@ -1,7 +1,7 @@
 services:
   stats-server:
     build: stats/stats-server
-    container_name: evm-stats-server
+    container_name: stats-server
     depends_on:
       - stats-db
     ports:
@@ -13,7 +13,7 @@ services:
 
   stats-db:
     image: postgres:16.1
-    container_name: db-stats-postgres
+    container_name: stats-db-postgres
     ports:
       - "6432:5432"
     environment:
@@ -21,7 +21,7 @@ services:
       - POSTGRES_USER=stats
       - POSTGRES_PASSWORD=stats
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}" ]
       timeout: 5s
       interval: 5s
       retries: 10
@@ -31,24 +31,10 @@ services:
     container_name: evm-main-service
     ports:
       - "8080:8080"
-    depends_on:
-      - ewm-db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:5432/main
       - SPRING_DATASOURCE_USERNAME=main
       - SPRING_DATASOURCE_PASSWORD=main
 
-  ewm-db:
-    image: postgres:16.1
-    container_name: db-main-service-postgres
-    ports:
-      - "7432:5432"
-    environment:
-      - POSTGRES_DB=main
-      - POSTGRES_USER=main
-      - POSTGRES_PASSWORD=main
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
-      timeout: 5s
-      interval: 5s
-      retries: 10
+#  ewm-db:
+#    image: postgres:16.1
