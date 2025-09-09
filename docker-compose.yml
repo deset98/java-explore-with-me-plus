@@ -23,8 +23,8 @@ services:
       interval: 5s
       retries: 10
 
-  ewm-service:
-    build: ./main-service
-    container_name: evm-main-service
-    ports:
-      - "8080:8080"
+#  ewm-service:
+#    build: ./main-service
+#    container_name: evm-main-service
+#    ports:
+#      - "8080:8080"
