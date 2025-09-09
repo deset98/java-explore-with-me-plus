@@ -15,7 +15,7 @@ services:
       - POSTGRES_USER=stats
       - POSTGRES_PASSWORD=stats
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}" ]
+      test: ["CMD-SHELL", "pg_isready -q -d stats -U stats"]
       timeout: 5s
       interval: 5s
       retries: 10
