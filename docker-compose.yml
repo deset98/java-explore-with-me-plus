@@ -1,15 +1,12 @@
 services:
   stats-server:
-    build: stats/stats-server
+    build: ./stats/stats-server
     container_name: stats-server
-    depends_on:
-      - stats-db
     ports:
       - "9090:9090"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
-      - SPRING_DATASOURCE_USERNAME=stats
-      - SPRING_DATASOURCE_PASSWORD=stats
+    depends_on:
+      stats-db:
+        condition: service_healthy
 
   stats-db:
     image: postgres:16.1
@@ -27,14 +24,7 @@ services:
       retries: 10
 
   ewm-service:
-    build: main-service
+    build: ./main-service
     container_name: evm-main-service
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:5432/main
-      - SPRING_DATASOURCE_USERNAME=main
-      - SPRING_DATASOURCE_PASSWORD=main
-
-#  ewm-db:
-#    image: postgres:16.1
