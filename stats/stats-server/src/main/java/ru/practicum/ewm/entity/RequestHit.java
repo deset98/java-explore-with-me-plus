@@ -1,4 +1,24 @@
 package ru.practicum.ewm.entity;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.antlr.v4.runtime.misc.NotNull;
+
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(schema = "EndpointHit")
 public class RequestHit {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @NotNull
+    private String app;
+    @NotNull
+    private String uri;
+    @NotNull
+    private String ip;
+    @NotNull
+    private String timestamp;
 }
