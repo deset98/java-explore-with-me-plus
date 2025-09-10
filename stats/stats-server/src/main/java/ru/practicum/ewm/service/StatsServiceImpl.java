@@ -14,17 +14,16 @@ import java.util.List;
 public class StatsServiceImpl implements StatsService {
 
     private final RequestHitRepository requestHitRepository;
-    private final StatRepository statRepository;
 
     @Override
     public ResponseEntity<Void> createEndpointHit(RequestHitDto requestHitDto) {
-        RequestHit requestHitEnt = mapper.toEntity(requestHitDto);
-        requestHitRepository.save(requestHitEnt);
-        return ResponseEntity.ok().build();
+        RequestHit savedHit = mapper.toEntity(requestHitDto);
+        requestHitRepository.save(savedHit);
+        return ResponseEntity.created("/hit").build();
     }
 
     @Override
     public List<StatDto> getViewStats(String start, String end, String app, List<String> uris, Boolean unique) {
-        return List.of();
+
     }
 }
