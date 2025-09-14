@@ -12,7 +12,6 @@ import ru.practicum.ewm.repository.RequestHitRepository;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -30,19 +29,18 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<StatDto> getViewStats(String start, String end, String app, List<String> uris, Boolean unique) {
-        RequestStatDto requestStatDto = new RequestStatDto(LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), uris, unique);
+    public List<StatDto> getViewStats(LocalDateTime start, LocalDateTime end, String app, List<String> uris, Boolean unique) {
+        RequestStatDto requestStatDto = new RequestStatDto(start, end, uris, unique);
         return getViewStats(requestStatDto, app);
     }
 
     private List<StatDto> getViewStats(RequestStatDto dto, String app) {
-        if (!dto.isUnique()) {
+        if (!dto.isValidPeriod()) {
             throw new ValidationException("End date must be after start date");
         }
         if (dto.isUnique()) {
-            return requestHitRepository.findUniqueStats(dto.getStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), dto.getEnd().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), app, dto.getUris());
-        } else {
-            return requestHitRepository.findUniqueStats(dto.getStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), dto.getEnd().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), app, dto.getUris());
+            return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
         }
+        return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
     }
 }
