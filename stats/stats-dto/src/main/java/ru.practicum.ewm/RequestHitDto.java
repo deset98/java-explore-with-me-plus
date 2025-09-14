@@ -1,5 +1,6 @@
 package ru.practicum.ewm;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,5 +25,6 @@ public class RequestHitDto {
     private String ip;
 
     @NotNull(message = "Дата и время, когда был совершен запрос к эндпоинту не может быть пустым")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 }
