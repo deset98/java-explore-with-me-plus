@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.RequestHitDto;
 import ru.practicum.ewm.RequestStatDto;
 import ru.practicum.ewm.StatDto;
-import ru.practicum.ewm.entity.RequestHit;
+import ru.practicum.ewm.entity.EndpointHit;
+import ru.practicum.ewm.mapper.HitMapper;
 import ru.practicum.ewm.repository.RequestHitRepository;
 
 import java.net.URI;
@@ -19,12 +20,12 @@ import java.util.List;
 public class StatsServiceImpl implements StatsService {
 
     private final RequestHitRepository requestHitRepository;
-    private final AAAA mapper;
+    private final HitMapper mapper;
 
     @Override
     public ResponseEntity<Void> createEndpointHit(RequestHitDto requestHitDto) {
-        RequestHit hitEntity = mapper.toEntity(requestHitDto);
-        RequestHit savedHit = requestHitRepository.save(hitEntity);
+        EndpointHit hitEntity = mapper.toEntity(requestHitDto);
+        EndpointHit savedHit = requestHitRepository.save(hitEntity);
         return ResponseEntity.created(URI.create("/hit/" + savedHit.getId())).build();
     }
 

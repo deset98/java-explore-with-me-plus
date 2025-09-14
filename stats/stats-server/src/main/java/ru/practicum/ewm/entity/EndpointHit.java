@@ -10,8 +10,8 @@ import org.antlr.v4.runtime.misc.NotNull;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(schema = "EndpointHit")
-public class RequestHit {
+@Table(name = "endpoint_hit")
+public class EndpointHit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

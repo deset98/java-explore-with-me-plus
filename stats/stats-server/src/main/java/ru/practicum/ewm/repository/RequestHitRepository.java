@@ -4,14 +4,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.StatDto;
-import ru.practicum.ewm.entity.RequestHit;
+import ru.practicum.ewm.entity.EndpointHit;
 
 import java.util.List;
 
 @Repository
-public interface RequestHitRepository extends JpaRepository<RequestHit, Long> {
+public interface RequestHitRepository extends JpaRepository<EndpointHit, Long> {
     @Query(value = "SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(rh.id)) " +
-            "FROM RequestHit rh " +
+            "FROM EndpointHit rh " +
             "WHERE rh.app = :app " +
             "AND FUNCTION('STR_TO_DATE', rh.timestamp, '%Y-%m-%d %H:%i:%s') " +
             "BETWEEN FUNCTION('STR_TO_DATE', :start, '%Y-%m-%d %H:%i:%s') " +
@@ -22,7 +22,7 @@ public interface RequestHitRepository extends JpaRepository<RequestHit, Long> {
     List<StatDto> findNotUniqueStats(String start, String end, String app, List<String> uris);
 
     @Query(value = "SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(rh.id)) " +
-            "FROM RequestHit rh " +
+            "FROM EndpointHit rh " +
             "WHERE rh.app = :app " +
             "AND FUNCTION('STR_TO_DATE', rh.timestamp, '%Y-%m-%d %H:%i:%s') " +
             "BETWEEN FUNCTION('STR_TO_DATE', :start, '%Y-%m-%d %H:%i:%s') " +

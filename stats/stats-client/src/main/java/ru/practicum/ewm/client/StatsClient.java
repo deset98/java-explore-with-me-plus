@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-@Component
 public class StatsClient {
     private final RestTemplate restTemplate;
     @Value("${explore-with-me-server.url}")
