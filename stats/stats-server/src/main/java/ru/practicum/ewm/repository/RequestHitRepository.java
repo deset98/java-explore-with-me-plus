@@ -13,22 +13,22 @@ public interface RequestHitRepository extends JpaRepository<EndpointHit, Long> {
     @Query(value = "SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(rh.id)) " +
             "FROM EndpointHit rh " +
             "WHERE rh.app = :app " +
-            "AND FUNCTION('STR_TO_DATE', rh.timestamp, '%Y-%m-%d %H:%i:%s') " +
-            "BETWEEN FUNCTION('STR_TO_DATE', :start, '%Y-%m-%d %H:%i:%s') " +
-            "AND FUNCTION('STR_TO_DATE', :end, '%Y-%m-%d %H:%i:%s') " +
+            "AND FUNCTION('TO_TIMESTAMP', rh.timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS') " +
+            "BETWEEN FUNCTION('TO_TIMESTAMP', :start, 'YYYY-MM-DD\"T\"HH24:MI:SS') " +
+            "AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD\"T\"HH24:MI:SS') " +
             "AND (:uris IS NULL OR rh.uri in :uris) " +
-            "GROUP BY rh.uri " +
+            "GROUP BY rh.app, rh.uri " +
             "ORDER BY COUNT(rh.id) DESC")
     List<StatDto> findNotUniqueStats(String start, String end, String app, List<String> uris);
 
     @Query(value = "SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(rh.id)) " +
             "FROM EndpointHit rh " +
             "WHERE rh.app = :app " +
-            "AND FUNCTION('STR_TO_DATE', rh.timestamp, '%Y-%m-%d %H:%i:%s') " +
-            "BETWEEN FUNCTION('STR_TO_DATE', :start, '%Y-%m-%d %H:%i:%s') " +
-            "AND FUNCTION('STR_TO_DATE', :end, '%Y-%m-%d %H:%i:%s') " +
+            "AND FUNCTION('TO_TIMESTAMP', rh.timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS') " +
+            "BETWEEN FUNCTION('TO_TIMESTAMP', :start, 'YYYY-MM-DD\"T\"HH24:MI:SS') " +
+            "AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD\"T\"HH24:MI:SS') " +
             "AND (:uris IS NULL OR rh.uri in :uris) " +
-            "GROUP BY rh.uri " +
+            "GROUP BY rh.app, rh.uri " +
             "ORDER BY COUNT(DISTINCT rh.id) DESC")
     List<StatDto> findUniqueStats(String start, String end, String app, List<String> uris);
 }

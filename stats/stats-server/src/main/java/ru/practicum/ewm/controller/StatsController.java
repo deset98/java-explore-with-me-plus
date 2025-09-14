@@ -1,6 +1,7 @@
 package ru.practicum.ewm.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/stats")
+@Slf4j
 public class StatsController {
 
     private final StatsService service;
@@ -28,7 +30,7 @@ public class StatsController {
                                   @RequestParam(required = false) List<String> uris,
                                   @RequestParam(required = false, defaultValue = "false") Boolean unique,
                                   HttpServletRequest request) {
-
+        log.info("Get stats from {}", uris);
         return service.getViewStats(start, end, request.getRequestURI(), uris, unique);
     }
 

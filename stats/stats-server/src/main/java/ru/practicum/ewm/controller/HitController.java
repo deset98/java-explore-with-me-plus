@@ -1,6 +1,7 @@
 package ru.practicum.ewm.controller;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,7 @@ import ru.practicum.ewm.service.StatsServiceImpl;
 
 @RestController
 @RequestMapping("/hit")
+@Slf4j
 public class HitController {
 
     private final StatsService service;
@@ -22,6 +24,7 @@ public class HitController {
 
     @PostMapping
     public ResponseEntity<Void> createHit(@Valid @RequestBody RequestHitDto requestHitDto) {
+        log.info("Create hit: {}", requestHitDto);
         return service.createEndpointHit(requestHitDto);
     }
 }

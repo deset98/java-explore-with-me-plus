@@ -2,6 +2,7 @@ package ru.practicum.ewm.service;
 
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.RequestHitDto;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StatsServiceImpl implements StatsService {
 
     private final RequestHitRepository requestHitRepository;
@@ -26,12 +28,14 @@ public class StatsServiceImpl implements StatsService {
     public ResponseEntity<Void> createEndpointHit(RequestHitDto requestHitDto) {
         EndpointHit hitEntity = mapper.toEntity(requestHitDto);
         EndpointHit savedHit = requestHitRepository.save(hitEntity);
+        log.debug("Сохранен хит  {}", savedHit);
         return ResponseEntity.created(URI.create("/hit/" + savedHit.getId())).build();
     }
 
     @Override
     public List<StatDto> getViewStats(LocalDateTime start, LocalDateTime end, String app, List<String> uris, Boolean unique) {
         RequestStatDto requestStatDto = new RequestStatDto(start, end, uris, unique);
+        log.debug("Сервис выполняет getViewStats");
         return getViewStats(requestStatDto, app);
     }
 
@@ -40,8 +44,10 @@ public class StatsServiceImpl implements StatsService {
             throw new ValidationException("End date must be after start date");
         }
         if (dto.isUnique()) {
+            log.debug("Вызван метод репозитория findUniqueStats()");
             return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
         }
-        return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
+        log.debug("Вызван метод репозитория findNotUniqueStats()");
+        return requestHitRepository.findNotUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
     }
 }
