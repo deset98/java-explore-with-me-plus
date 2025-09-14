@@ -36,18 +36,18 @@ public class StatsServiceImpl implements StatsService {
     public List<StatDto> getViewStats(LocalDateTime start, LocalDateTime end, String app, List<String> uris, Boolean unique) {
         RequestStatDto requestStatDto = new RequestStatDto(start, end, uris, unique);
         log.debug("Сервис выполняет getViewStats");
-        return getViewStats(requestStatDto, app);
+        return getViewStats(requestStatDto);
     }
 
-    private List<StatDto> getViewStats(RequestStatDto dto, String app) {
+    private List<StatDto> getViewStats(RequestStatDto dto) {
         if (!dto.isValidPeriod()) {
             throw new ValidationException("End date must be after start date");
         }
         if (dto.isUnique()) {
             log.debug("Вызван метод репозитория findUniqueStats()");
-            return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
+            return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
         }
         log.debug("Вызван метод репозитория findNotUniqueStats()");
-        return requestHitRepository.findNotUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), app, dto.getUris());
+        return requestHitRepository.findNotUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
     }
 }
