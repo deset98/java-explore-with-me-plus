@@ -46,8 +46,9 @@ public class StatsServiceImpl implements StatsService {
         if (dto.isUnique()) {
             log.debug("Вызван метод репозитория findUniqueStats()");
             return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
+        } else {
+            log.debug("Вызван метод репозитория findNotUniqueStats()");
+            return requestHitRepository.findNotUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
         }
-        log.debug("Вызван метод репозитория findNotUniqueStats()");
-        return requestHitRepository.findNotUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
     }
 }

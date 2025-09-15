@@ -1,11 +1,9 @@
 package ru.practicum.ewm.client;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.ewm.RequestHitDto;
@@ -61,7 +59,8 @@ public class StatsClient {
                     url,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<List<StatDto>>() {}
+                    new ParameterizedTypeReference<List<StatDto>>() {
+                    }
             );
             log.info("Получена статистика: {}", response.getBody());
             return response;

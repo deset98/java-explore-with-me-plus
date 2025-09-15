@@ -12,29 +12,29 @@ import java.util.List;
 public interface RequestHitRepository extends JpaRepository<EndpointHit, Long> {
     @Query(
             """
-            SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(rh.id))
-            FROM EndpointHit rh
-            WHERE FUNCTION('TO_TIMESTAMP', rh.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS')
-            BETWEEN FUNCTION('TO_TIMESTAMP', :start, 'YYYY-MM-DD"T"HH24:MI:SS')
-            AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD"T"HH24:MI:SS')
-            AND (:uris IS NULL OR rh.uri in :uris)
-            GROUP BY rh.app, rh.uri
-            ORDER BY COUNT(rh.id) DESC
-            """
+                    SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(rh.id))
+                    FROM EndpointHit rh
+                    WHERE FUNCTION('TO_TIMESTAMP', rh.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    BETWEEN FUNCTION('TO_TIMESTAMP', :start, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    AND (:uris IS NULL OR rh.uri in :uris)
+                    GROUP BY rh.app, rh.uri
+                    ORDER BY COUNT(rh.id) DESC
+                    """
     )
     List<StatDto> findNotUniqueStats(String start, String end, List<String> uris);
 
     @Query(
             """
-            SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(DISTINCT rh.id))
-            FROM EndpointHit rh
-            WHERE FUNCTION('TO_TIMESTAMP', rh.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS')
-            BETWEEN FUNCTION('TO_TIMESTAMP', :start, 'YYYY-MM-DD"T"HH24:MI:SS')
-            AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD"T"HH24:MI:SS')
-            AND (:uris IS NULL OR rh.uri in :uris)
-            GROUP BY rh.app, rh.uri
-            ORDER BY COUNT(DISTINCT rh.id) DESC
-            """
+                    SELECT new ru.practicum.ewm.StatDto(rh.app, rh.uri, COUNT(DISTINCT rh.ip))
+                    FROM EndpointHit rh
+                    WHERE FUNCTION('TO_TIMESTAMP', rh.timestamp, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    BETWEEN FUNCTION('TO_TIMESTAMP', :start, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    AND (:uris IS NULL OR rh.uri in :uris)
+                    GROUP BY rh.app, rh.uri
+                    ORDER BY COUNT(DISTINCT rh.ip) DESC 
+                    """
     )
     List<StatDto> findUniqueStats(String start, String end, List<String> uris);
 }
