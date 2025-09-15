@@ -15,7 +15,7 @@ public class HitMapper {
         endpointHit.setApp(requestHitDto.getApp());
         endpointHit.setUri(requestHitDto.getUri());
         endpointHit.setIp(requestHitDto.getIp());
-        endpointHit.setTimestamp(convertLocalDateTimeToString(requestHitDto.getTimestamp())); // Преобразование LocalDateTime в String
+        endpointHit.setTimestamp(convertLocalDateTimeToString(requestHitDto.getTimestamp()));
 
         return endpointHit;
     }

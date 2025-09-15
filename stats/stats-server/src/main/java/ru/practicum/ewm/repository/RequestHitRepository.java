@@ -33,7 +33,7 @@ public interface RequestHitRepository extends JpaRepository<EndpointHit, Long> {
                     AND FUNCTION('TO_TIMESTAMP', :end, 'YYYY-MM-DD"T"HH24:MI:SS')
                     AND (:uris IS NULL OR rh.uri in :uris)
                     GROUP BY rh.app, rh.uri
-                    ORDER BY COUNT(DISTINCT rh.ip) DESC 
+                    ORDER BY COUNT(DISTINCT rh.ip) DESC
                     """
     )
     List<StatDto> findUniqueStats(String start, String end, List<String> uris);

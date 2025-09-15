@@ -33,6 +33,4 @@ public class StatsController {
         log.info("Get stats from {}", uris);
         return service.getViewStats(start, end, request.getRequestURI(), uris, unique);
     }
-
 }
-
