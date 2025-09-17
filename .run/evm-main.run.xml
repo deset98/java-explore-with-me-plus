@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="evm-main" type="CompoundRunConfigurationType">
+    <toRun name="MainServiceApplication" type="SpringBootApplicationConfigurationType" />
+    <toRun name="StartClient" type="SpringBootApplicationConfigurationType" />
+    <toRun name="StatsApplication" type="SpringBootApplicationConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

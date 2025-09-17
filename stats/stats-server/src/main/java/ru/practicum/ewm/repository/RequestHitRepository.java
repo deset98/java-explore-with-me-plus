@@ -20,7 +20,7 @@ public interface RequestHitRepository extends JpaRepository<EndpointHit, Long> {
                     AND (:uris IS NULL OR rh.uri in :uris)
                     GROUP BY rh.app, rh.uri
                     ORDER BY COUNT(rh.id) DESC
-                    """
+            """
     )
     List<StatDto> findNotUniqueStats(String start, String end, List<String> uris);
 
@@ -34,7 +34,7 @@ public interface RequestHitRepository extends JpaRepository<EndpointHit, Long> {
                     AND (:uris IS NULL OR rh.uri in :uris)
                     GROUP BY rh.app, rh.uri
                     ORDER BY COUNT(DISTINCT rh.ip) DESC
-                    """
+            """
     )
     List<StatDto> findUniqueStats(String start, String end, List<String> uris);
 }
