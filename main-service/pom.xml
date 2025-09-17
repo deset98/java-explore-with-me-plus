@@ -15,6 +15,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <lombok.version>1.18.30</lombok.version>
     </properties>
 
     <dependencies>
@@ -62,6 +64,23 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${org.mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

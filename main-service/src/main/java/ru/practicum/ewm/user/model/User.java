@@ -1,7 +1,8 @@
 package ru.practicum.ewm.user.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
