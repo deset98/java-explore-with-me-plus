@@ -43,8 +43,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<UserResponseDto> findAll(RequestValidDto dto) {
-        int pageNumber = dto.getFrom() / dto.getSize();
-        Pageable pageable = PageRequest.of(pageNumber, dto.getSize(), Sort.by("id"));
         return userRepository.findAllByParams(dto.getIds(), pageable).stream()
                 .map(user -> userMapper.toResponseDto(user))
                 .collect(Collectors.toUnmodifiableList());
