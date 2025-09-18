@@ -2,15 +2,15 @@ package ru.practicum.ewm.compilation.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.ewm.category.service.CompilationService;
+import ru.practicum.ewm.category.service.CategoryService;
 
 @RestController
 @RequestMapping("/compilations")
 public class PublicCompilationController {
 
-    private final CompilationService compilationService;
+    private final CategoryService compilationService;
 
-    public PublicCompilationController(final CompilationService compilationService) {
+    public PublicCompilationController(final CategoryService compilationService) {
         this.compilationService = compilationService;
     }
 }

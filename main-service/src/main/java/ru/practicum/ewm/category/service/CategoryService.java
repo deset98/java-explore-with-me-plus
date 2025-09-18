@@ -1,4 +1,4 @@
 package ru.practicum.ewm.category.service;
 
-public interface CompilationService {
+public interface CategoryService {
 }
