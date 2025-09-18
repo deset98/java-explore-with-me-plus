@@ -7,6 +7,10 @@ import lombok.*;
 @Table(name = "categories")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Category {
 
     @Id
