@@ -5,7 +5,7 @@ import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.model.UserInputDto;
 import ru.practicum.ewm.user.model.UserResponseDto;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
     UserResponseDto toResponseDto(User user);
 
