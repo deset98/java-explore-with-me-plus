@@ -1,5 +1,6 @@
 package ru.practicum.ewm.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
-@Validated
 public class AdminUserController {
 
     private final UserService userService;
@@ -24,7 +24,7 @@ public class AdminUserController {
     }
 
     @PostMapping
-    public UserResponseDto add(@RequestBody UserInputDto dto) {
+    public UserResponseDto add(@Valid @RequestBody UserInputDto dto) {
         return userService.add(dto);
     }
 

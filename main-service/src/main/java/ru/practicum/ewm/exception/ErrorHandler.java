@@ -13,4 +13,10 @@ public class ErrorHandler {
     public ErrorResponse handleNotFoundException(NotFoundException ex) {
         return new ErrorResponse("Object not found", ex.getMessage());
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequestException(BadRequestException ex) {
+        return new ErrorResponse("Bad Request", ex.getMessage());
+    }
 }
