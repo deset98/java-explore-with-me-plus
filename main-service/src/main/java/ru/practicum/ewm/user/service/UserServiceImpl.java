@@ -1,9 +1,6 @@
 package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.NotFoundException;
@@ -43,7 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<UserResponseDto> findAll(RequestValidDto dto) {
-        return userRepository.findAllByParams(dto.getIds(), pageable).stream()
+        return userRepository.findAllByParams(dto.getIds(), dto.getFrom(), dto.getSize()).stream()
                 .map(user -> userMapper.toResponseDto(user))
                 .collect(Collectors.toUnmodifiableList());
     }
