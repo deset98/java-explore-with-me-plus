@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ewm-dev" type="CompoundRunConfigurationType">
-    <toRun name="StartClient" type="SpringBootApplicationConfigurationType" />
-    <toRun name="main-dev" type="SpringBootApplicationConfigurationType" />
-    <toRun name="stats-dev" type="SpringBootApplicationConfigurationType" />
-    <method v="2" />
-  </configuration>
-</component>

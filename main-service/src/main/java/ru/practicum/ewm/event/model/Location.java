@@ -1,22 +1,25 @@
-package ru.practicum.ewm.category.model;
+package ru.practicum.ewm.event.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "locations")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Category {
+public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private Integer latitude;
+
+    @Column(nullable = false)
+    private Integer longitude;
 }
