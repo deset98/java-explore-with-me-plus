@@ -10,4 +10,6 @@ public interface UserMapper {
     UserResponseDto toResponseDto(User user);
 
     User toEntity(UserInputDto dto);
+
+    User toEntity(UserResponseDto dto);
 }

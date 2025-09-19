@@ -1,6 +1,7 @@
 package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.NotFoundException;
@@ -25,6 +26,12 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDto> findAll(List<Long> ids, Integer from, Integer size) {
         RequestValidDto requestValidDto = new RequestValidDto(ids, from, size);
         return findAll(requestValidDto);
+    }
+
+    @Override
+    public UserResponseDto findById(Long id) {
+        User result = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        return userMapper.toResponseDto(result);
     }
 
     @Override

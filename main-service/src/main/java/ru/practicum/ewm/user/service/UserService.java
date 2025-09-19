@@ -9,6 +9,8 @@ import java.util.List;
 public interface UserService {
     List<UserResponseDto> findAll(List<Long> ids, Integer from, Integer size);
 
+    UserResponseDto findById(Long id);
+
     UserResponseDto add(UserInputDto userInputDto);
 
     ResponseEntity<Void> delete(Long userId);
