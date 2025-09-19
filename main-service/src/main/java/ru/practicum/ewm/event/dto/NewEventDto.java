@@ -1,7 +1,5 @@
 package ru.practicum.ewm.event.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.event.model.Location;
 import ru.practicum.ewm.event.validation.FutureAfterHours;
 
 import java.time.LocalDateTime;
@@ -32,9 +29,7 @@ public class NewEventDto {
     private String description;
 
     @NotNull
-//    @FutureAfterHours(hours = 2)
-    @Future
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @FutureAfterHours(hours = 2)
     private LocalDateTime eventDate;
 
     @NotNull
