@@ -31,8 +31,10 @@ public class Event {
     @ToString.Exclude
     private Category category;
 
-    @Column(name = "confirmed_requests")
-    private Integer confirmedRequests;
+    @Column(name = "confirmed_requests",
+            nullable = false,
+            columnDefinition = "integer default 0")
+    private Long confirmedRequests = 0L;
 
     @Column(name = "created_on",
             nullable = false)
@@ -81,6 +83,7 @@ public class Event {
             nullable = false)
     private String title;
 
-    @Column
-    private Integer views;
+    @Column(nullable = false,
+            columnDefinition = "integer default 0")
+    private Long views = 0L;
 }
