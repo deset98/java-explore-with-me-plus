@@ -5,6 +5,8 @@ import lombok.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.user.model.User;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "requests")
 @Getter
@@ -27,10 +29,10 @@ public class Request {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_requests_users"))
     @ToString.Exclude
-    private User user;
+    private User requester;
 
     @Column
-    private String created;
+    private LocalDateTime created;
 
     @Enumerated(EnumType.STRING)
     private Status status;
