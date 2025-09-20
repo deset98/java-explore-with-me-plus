@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.ewm.event.model.Location;
 import ru.practicum.ewm.event.validation.FutureAfterHours;
 
 import java.time.LocalDateTime;

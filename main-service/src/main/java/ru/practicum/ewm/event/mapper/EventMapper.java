@@ -1,0 +1,44 @@
+package ru.practicum.ewm.event.mapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.ewm.event.dto.EventFullDto;
+import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.NewEventDto;
+import ru.practicum.ewm.event.model.Event;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+@Mapper(componentModel = "spring",
+        uses = {LocationMapper.class, CategoryMapper.class, UserMapper.class})
+public interface EventMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "eventDate", expression = "java(toInstant(newEventDto.getEventDate()))")
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    Event toEntity(NewEventDto newEventDto);
+
+    @Mapping(target = "eventDate", expression = "java(toLocalDateTime(event.getEventDate()))")
+    EventShortDto toShortDto(Event event);
+
+    @Mapping(target = "createdOn", expression = "java(toLocalDateTime(event.getCreatedOn()))")
+    @Mapping(target = "eventDate", expression = "java(toLocalDateTime(event.getEventDate()))")
+    @Mapping(target = "publishedOn", expression = "java(toLocalDateTime(event.getPublishedOn()))")
+    EventFullDto toFullDto(Event event);
+
+    default Instant toInstant(LocalDateTime dateTime) {
+        return dateTime.toInstant(ZoneOffset.UTC);
+    }
+
+    default LocalDateTime toLocalDateTime(Instant instant) {
+        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    }
+}

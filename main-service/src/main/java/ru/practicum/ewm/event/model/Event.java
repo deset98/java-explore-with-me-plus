@@ -26,19 +26,22 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id",
-                nullable = false,
-                foreignKey = @ForeignKey(name = "fk_events_categories"))
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_events_categories"))
     @ToString.Exclude
     private Category category;
 
     @Column(name = "confirmed_requests",
             nullable = false,
             columnDefinition = "integer default 0")
+    @Builder.Default
     private Long confirmedRequests = 0L;
 
     @Column(name = "created_on",
             nullable = false)
-    private Instant createdOn;
+//    columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    @Builder.Default
+    private Instant createdOn = Instant.now();
 
     @Column(length = 7000,
             nullable = false)
@@ -50,15 +53,15 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id",
-                nullable = false,
-                foreignKey = @ForeignKey(name = "fk_events_users"))
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_events_users"))
     @ToString.Exclude
     private User initiator;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id",
-                nullable = false,
-                foreignKey = @ForeignKey(name = "fk_events_locations"))
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_events_locations"))
     @ToString.Exclude
     private Location location;
 
@@ -77,7 +80,9 @@ public class Event {
     private Boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
-    private State state;
+    @Column(nullable = false)
+    @Builder.Default
+    private State state = State.PENDING;
 
     @Column(length = 120,
             nullable = false)
@@ -85,5 +90,6 @@ public class Event {
 
     @Column(nullable = false,
             columnDefinition = "integer default 0")
+    @Builder.Default
     private Long views = 0L;
 }
