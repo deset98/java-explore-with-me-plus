@@ -31,21 +31,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto add(UserInputDto userInputDto) {
         String localpart = userInputDto.getEmail().substring(0, userInputDto.getEmail().indexOf('@'));
-        String domain = userInputDto.getEmail().substring(userInputDto.getEmail().indexOf('@')+1);
         if (localpart.length() > 64) {
             throw new BadRequestException("Localpart is too long");
-        }
-        if (domain.length() > 63) {
-            throw new BadRequestException("Domain is too long");
         }
         User savedUser = userRepository.save(userMapper.toEntity(userInputDto));
         return userMapper.toResponseDto(savedUser);
     }
 
     @Override
-    public ResponseEntity<Void> delete(Long userId) {
+    public void delete(Long userId) {
         userRepository.delete(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found")));
-        return ResponseEntity.noContent().build();
     }
 
     private List<UserResponseDto> findAll(RequestValidDto dto) {
