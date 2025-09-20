@@ -25,6 +25,7 @@ public class PrivateEventController {
     public ResponseEntity<EventFullDto> create(@PathVariable("userId") Long userId,
                                                @Valid @RequestBody final NewEventDto newEventDto) {
         log.debug("В PrivateEventController от user = {} поступил запрос на создание события {}", userId, newEventDto);
+
         EventFullDto result = eventService.create(userId, newEventDto);
         return ResponseEntity
                 .created(URI.create("/events/" + result.getId()))
