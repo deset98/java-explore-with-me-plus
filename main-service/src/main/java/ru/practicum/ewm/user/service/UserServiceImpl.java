@@ -1,7 +1,6 @@
 package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.NotFoundException;
