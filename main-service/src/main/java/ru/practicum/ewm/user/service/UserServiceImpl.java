@@ -3,6 +3,7 @@ package ru.practicum.ewm.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.RequestValidDto;
@@ -35,14 +36,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto add(UserInputDto userInputDto) {
+        String localpart = userInputDto.getEmail().substring(0, userInputDto.getEmail().indexOf('@'));
+        if (localpart.length() > 64) {
+            throw new BadRequestException("Localpart is too long");
+        }
         User savedUser = userRepository.save(userMapper.toEntity(userInputDto));
         return userMapper.toResponseDto(savedUser);
     }
 
     @Override
-    public ResponseEntity<Void> delete(Long userId) {
+    public void delete(Long userId) {
         userRepository.delete(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found")));
-        return ResponseEntity.noContent().build();
     }
 
     private List<UserResponseDto> findAll(RequestValidDto dto) {

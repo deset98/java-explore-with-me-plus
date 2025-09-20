@@ -13,5 +13,5 @@ public interface UserService {
 
     UserResponseDto add(UserInputDto userInputDto);
 
-    ResponseEntity<Void> delete(Long userId);
+    void delete(Long userId);
 }
