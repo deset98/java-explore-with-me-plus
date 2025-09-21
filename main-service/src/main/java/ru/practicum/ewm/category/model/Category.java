@@ -8,6 +8,10 @@ import lombok.Setter;
 @Table(name = "categories")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Category {
 
     @Id

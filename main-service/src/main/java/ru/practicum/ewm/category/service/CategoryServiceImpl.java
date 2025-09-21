@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 
 @Service
-public class CategoryServiceImpl implements CompilationService {
+public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
