@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.mapper;
 
+import org.mapstruct.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.*;

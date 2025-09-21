@@ -25,6 +25,15 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND) //404
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        return new ErrorResponse(
+                "Не найден объект.",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN) //403
     public ErrorResponse handleValidationException(final ForbiddenException e) {
         return new ErrorResponse(
@@ -32,4 +41,34 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    private record ErrorResponse(String error, String description){}
 }
+
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.BAD_REQUEST) //400
+//    public ErrorResponse handleValidationException(final ValidationException e) {
+//        return new ErrorResponse(
+//                "Ошибка валидации.",
+//                e.getMessage()
+//        );
+//    }
+
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.FORBIDDEN) //403
+//    public ErrorResponse handleValidationException(final ForbiddenException e) {
+//        return new ErrorResponse(
+//                "Объект не доступен.",
+//                e.getMessage()
+//        );
+//    }
+
+
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.BAD_REQUEST) //400
+//    public ErrorResponse handleValidationException(final BadRequestException e) {
+//        return new ErrorResponse(
+//                "Ошибка в запросе.",
+//                e.getMessage()
+//        );
+//    }
