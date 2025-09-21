@@ -1,10 +1,10 @@
 package ru.practicum.ewm.event.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
+import ru.practicum.ewm.event.dto.UpdEventUserRequest;
 import ru.practicum.ewm.event.model.Event;
 
 import java.time.Instant;
@@ -33,6 +33,18 @@ public interface EventMapper {
     @Mapping(target = "eventDate", expression = "java(toLocalDateTime(event.getEventDate()))")
     @Mapping(target = "publishedOn", expression = "java(toLocalDateTime(event.getPublishedOn()))")
     EventFullDto toFullDto(Event event);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "eventDate", expression = "java(toInstant(updEventUserRequest.getEventDate()))")
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    void updateFromDto(UpdEventUserRequest updEventUserRequest, @MappingTarget Event event);
 
     default Instant toInstant(LocalDateTime dateTime) {
         return dateTime.toInstant(ZoneOffset.UTC);

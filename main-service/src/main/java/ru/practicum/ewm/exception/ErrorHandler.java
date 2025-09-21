@@ -17,6 +17,15 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN) //403
+    public ErrorResponse handleValidationException(final ForbiddenException e) {
+        return new ErrorResponse(
+                "Объект не доступен.",
+                e.getMessage()
+        );
+    }
+
     private record ErrorResponse(String error, String description){}
 }
 

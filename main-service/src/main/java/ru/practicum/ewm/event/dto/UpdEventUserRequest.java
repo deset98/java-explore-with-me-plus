@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.event.model.Location;
 import ru.practicum.ewm.event.validation.FutureAfterHours;
 
 import java.time.LocalDateTime;
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewEventDto {
+public class UpdEventUserRequest {
 
     @NotBlank
     @Size(min = 20, max = 2000)
@@ -48,6 +47,9 @@ public class NewEventDto {
 
     @NotNull
     private Boolean requestModeration;
+
+    @NotNull
+    private StateAction stateAction;
 
     @NotBlank
     @Size(min = 3, max = 120)
