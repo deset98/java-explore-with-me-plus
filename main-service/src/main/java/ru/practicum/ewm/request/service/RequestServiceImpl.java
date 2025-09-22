@@ -6,6 +6,8 @@ import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.exception.ConflictException;
+import ru.practicum.ewm.exception.ErrorHandler;
 import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.model.Request;
@@ -18,6 +20,7 @@ import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,17 +42,16 @@ public class RequestServiceImpl implements RequestService {
         boolean requestExists = requests.stream()
                 .anyMatch(r -> r.getRequester().getId().equals(userId));
         if  (requestExists) {
-            throw new ForbiddenException("Запрос уже создан ранее");
+            throw new ConflictException("Запрос уже создан ранее");
         }
-
-        //нет модели ShortUserDto
-        //проверка: инициатор события не может добавить запрос на участие в своём событии(409)
-
+        if (Objects.equals(event.getInitiator().getId(), userMapper.toUserShortDto(user).getId())) {
+            throw new ConflictException("Инициатор события не может добавить запрос на участие в своём событии");
+        }
         if (!event.getState().equals(State.PUBLISHED)) {
-            throw new ForbiddenException("Нельзя участвовать в неопубликованном событии");
+            throw new ConflictException("Нельзя участвовать в неопубликованном событии");
         }
         if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= requests.size()) {
-            throw new ForbiddenException("Достигнут лимит запросов на участие в событии");
+            throw new ConflictException("Достигнут лимит запросов на участие в событии");
         }
         if (!event.getRequestModeration()) {
             Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.CONFIRMED));
