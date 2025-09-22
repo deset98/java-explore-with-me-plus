@@ -1,8 +1,7 @@
 package ru.practicum.ewm.user.service;
 
-import org.springframework.http.ResponseEntity;
-import ru.practicum.ewm.user.model.UserInputDto;
-import ru.practicum.ewm.user.model.UserResponseDto;
+import ru.practicum.ewm.user.dto.UserInputDto;
+import ru.practicum.ewm.user.dto.UserResponseDto;
 
 import java.util.List;
 

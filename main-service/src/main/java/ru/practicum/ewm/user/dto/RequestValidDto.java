@@ -1,4 +1,4 @@
-package ru.practicum.ewm.user.model;
+package ru.practicum.ewm.user.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

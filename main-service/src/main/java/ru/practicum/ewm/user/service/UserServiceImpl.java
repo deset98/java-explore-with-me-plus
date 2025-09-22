@@ -1,20 +1,22 @@
 package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.mapper.UserMapper;
-import ru.practicum.ewm.user.model.RequestValidDto;
+import ru.practicum.ewm.user.dto.RequestValidDto;
 import ru.practicum.ewm.user.model.User;
-import ru.practicum.ewm.user.model.UserInputDto;
-import ru.practicum.ewm.user.model.UserResponseDto;
+import ru.practicum.ewm.user.dto.UserInputDto;
+import ru.practicum.ewm.user.dto.UserResponseDto;
 import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -23,22 +25,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> findAll(List<Long> ids, Integer from, Integer size) {
+        log.debug("Сервис UserServiceImpl; Метод findAll(); ids={}, from={}, size={}", ids, from, size);
+
         RequestValidDto requestValidDto = new RequestValidDto(ids, from, size);
         return findAll(requestValidDto);
     }
 
     @Override
     public UserResponseDto add(UserInputDto userInputDto) {
+        log.debug("Сервис UserServiceImpl; Метод add(); userInputDto={}", userInputDto);
+
         String localpart = userInputDto.getEmail().substring(0, userInputDto.getEmail().indexOf('@'));
         if (localpart.length() > 64) {
             throw new BadRequestException("Localpart is too long");
         }
         User savedUser = userRepository.save(userMapper.toEntity(userInputDto));
+
+        log.debug("Сервис UserServiceImpl; Метод add(); savedUser={}", userInputDto);
+
         return userMapper.toResponseDto(savedUser);
     }
 
     @Override
     public void delete(Long userId) {
+        log.debug("Сервис UserServiceImpl; Метод delete(); userId={}", userId);
+
 
         if(userRepository.existsById(userId)) {
             userRepository.deleteById(userId);
