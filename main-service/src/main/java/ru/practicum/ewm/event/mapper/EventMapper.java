@@ -47,6 +47,16 @@ public interface EventMapper {
     @Mapping(target = "confirmedRequests", ignore = true)
     void updateFromDto(UpdEventUserRequest updEventUserRequest, @MappingTarget Event event);
 
+    @Mapping(target = "id", ignore = true) // если нужно генерировать новый id
+    @Mapping(target = "category", ignore = true) // если категорией будет управлять другой сервис
+    @Mapping(target = "initiator", ignore = true) // инициатор тоже отдельной логикой
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    Event toEntity(EventFullDto eventFullDto);
+
     default Instant toInstant(LocalDateTime dateTime) {
         return dateTime.toInstant(ZoneOffset.UTC);
     }

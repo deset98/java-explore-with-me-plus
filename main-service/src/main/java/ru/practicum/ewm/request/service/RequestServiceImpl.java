@@ -6,7 +6,6 @@ import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.service.EventService;
-import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.model.Request;
@@ -40,23 +39,23 @@ public class RequestServiceImpl implements RequestService {
         boolean requestExists = requests.stream()
                 .anyMatch(r -> r.getRequester().getId().equals(userId));
         if  (requestExists) {
-            throw new ConflictException("Запрос уже создан ранее");
+            throw new ForbiddenException("Запрос уже создан ранее");
         }
 
         //нет модели ShortUserDto
         //проверка: инициатор события не может добавить запрос на участие в своём событии(409)
 
         if (!event.getState().equals(State.PUBLISHED)) {
-            throw new ConflictException("Нельзя участвовать в неопубликованном событии");
+            throw new ForbiddenException("Нельзя участвовать в неопубликованном событии");
         }
         if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= requests.size()) {
-            throw new ConflictException("Достигнут лимит запросов на участие в событии");
+            throw new ForbiddenException("Достигнут лимит запросов на участие в событии");
         }
         if (!event.getRequestModeration()) {
-            Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toFullDto(event), Status.CONFIRMED));
+            Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.CONFIRMED));
             return RequestMapper.toResponseEntity(result);
         }
-        Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toFullDto(event), Status.PENDING));
+        Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.PENDING));
         return RequestMapper.toResponseEntity(result);
     }
 

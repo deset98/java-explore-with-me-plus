@@ -21,11 +21,5 @@ public class ErrorHandler {
         return new ErrorResponse("Bad Request", ex.getMessage());
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleBadRequestException(ConflictException ex) {
-        return new ErrorResponse("Bad Request", ex.getMessage());
-    }
-
     private record ErrorResponse(String error, String description){}
 }

@@ -11,5 +11,7 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByRequester(User requester);
 
+    Boolean existsByRequesterIdAndEventId(Long userId, Long eventId);
+
     List<Request> findAllByEventId(Long eventId);
 }
