@@ -6,6 +6,7 @@ import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdEventUserRequest;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.user.mapper.UserMapper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
