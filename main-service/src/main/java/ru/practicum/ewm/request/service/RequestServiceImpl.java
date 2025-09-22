@@ -2,7 +2,12 @@ package ru.practicum.ewm.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.dto.EventFullDto;
+import ru.practicum.ewm.event.mapper.EventMapper;
+import ru.practicum.ewm.event.model.State;
+import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.exception.ForbiddenException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestMapper;
 import ru.practicum.ewm.request.model.ResponseRequestDto;
@@ -21,18 +26,36 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserService userService;
     private final UserMapper userMapper;
+    private final EventService eventService;
+    private final EventMapper eventMapper;
 
 
     @Override
     public ResponseRequestDto createRequest(Long userId, Long eventId) {
         User user = userMapper.toEntity(userService.findById(userId));
-        //получаю event
-        //проверка: нельзя добавить повторный запрос(409)
+        EventFullDto event = eventService.findOne(userId, eventId);
+        List<Request> requests = requestRepository.findAllByEventId(eventId);
+
+        boolean requestExists = requests.stream()
+                .anyMatch(r -> r.getRequester().getId().equals(userId));
+        if  (requestExists) {
+            throw new ForbiddenException("Запрос уже создан ранее");
+        }
+
+        //нет модели ShortUserDto
         //проверка: инициатор события не может добавить запрос на участие в своём событии(409)
-        //проверка: нельзя участвовать в неопубликованном событии (409)
-        //проверка: если у события достигнут лимит запросов на участие - необходимо вернуть ошибку(409)
-        //если для события отключена пре-модерация запросов на участие, то запрос должен автоматически перейти в состояние подтвержденного(CONFIRMED)
-        Request result = requestRepository.save(RequestMapper.toEntity(user, new Event(), Status.CONFIRMED)); //сохранение записи
+
+        if (!event.getState().equals(State.PUBLISHED)) {
+            throw new ForbiddenException("Нельзя участвовать в неопубликованном событии");
+        }
+        if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= requests.size()) {
+            throw new ForbiddenException("Достигнут лимит запросов на участие в событии");
+        }
+        if (!event.getRequestModeration()) {
+            Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.CONFIRMED));
+            return RequestMapper.toResponseEntity(result);
+        }
+        Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.PENDING));
         return RequestMapper.toResponseEntity(result);
     }
 
@@ -46,8 +69,9 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public ResponseRequestDto cancelRequest(Long userId, Long requestId) {
         User user = userMapper.toEntity(userService.findById(userId));
-        //получаю request
-        Request result = requestRepository.save(RequestMapper.toEntity(user, new Event(), Status.REJECTED)); //сохранение записи
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Запрос не найден"));
+        Request result = requestRepository.save(RequestMapper.toEntity(user, request.getEvent(), Status.REJECTED)); //сохранение записи
         return RequestMapper.toResponseEntity(result);
     }
 }
