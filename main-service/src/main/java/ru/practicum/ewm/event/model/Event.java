@@ -5,6 +5,8 @@ import lombok.*;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.user.model.User;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "events")
 @Getter
@@ -14,59 +16,80 @@ import ru.practicum.ewm.user.model.User;
 @AllArgsConstructor
 @ToString
 public class Event {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(length = 2000,
+            nullable = false)
     private String annotation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id",
-                foreignKey = @ForeignKey(name = "fk_events_categories"))
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_events_categories"))
     @ToString.Exclude
     private Category category;
 
-    @Column(name = "confirmed_requests")
-    private Integer confirmedRequests;
+    @Column(name = "confirmed_requests",
+            nullable = false,
+            columnDefinition = "integer default 0")
+    @Builder.Default
+    private Long confirmedRequests = 0L;
 
-    @Column
+    @Column(name = "created_on",
+            nullable = false)
+//    columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    @Builder.Default
+    private Instant createdOn = Instant.now();
+
+    @Column(length = 7000,
+            nullable = false)
     private String description;
 
-    @Column(name = "event_date")
-    private String eventDate;
+    @Column(name = "event_date",
+            nullable = false)
+    private Instant eventDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id",
-                foreignKey = @ForeignKey(name = "fk_events_users"))
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_events_users"))
     @ToString.Exclude
     private User initiator;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id",
-                foreignKey = @ForeignKey(name = "fk_events_locations"))
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_events_locations"))
     @ToString.Exclude
     private Location location;
 
     @Column(nullable = false)
     private Boolean paid;
 
-    @Column(name = "participant_limit")
+    @Column(name = "participant_limit",
+            nullable = false)
     private Integer participantLimit;
 
     @Column(name = "published_on")
-    private String publishedOn;
+    private Instant publishedOn;
 
-    @Column(name = "request_moderation", nullable = false)
+    @Column(name = "request_moderation",
+            nullable = false)
     private Boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
-    private State state;
+    @Column(nullable = false)
+    @Builder.Default
+    private State state = State.PENDING;
 
-    @Column
+    @Column(length = 120,
+            nullable = false)
     private String title;
 
-    @Column
-    private Integer views;
+    @Column(nullable = false,
+            columnDefinition = "integer default 0")
+    @Builder.Default
+    private Long views = 0L;
 }
