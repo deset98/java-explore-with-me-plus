@@ -12,9 +12,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value =
             """
                     SELECT *
-                    FROM users
-                    WHERE (:ids IS NULL OR id IN (:ids))
-                    ORDER BY id
+                    FROM users u
+                    WHERE (COALESCE(:ids, NULL) IS NULL OR u.id IN (:ids))
+                    ORDER BY u.id
                     LIMIT :size
                     OFFSET :from
              """,

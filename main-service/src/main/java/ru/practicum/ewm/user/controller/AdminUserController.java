@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.user.dto.UserInputDto;
-import ru.practicum.ewm.user.dto.UserResponseDto;
+import ru.practicum.ewm.user.dto.NewUserRequest;
+import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.service.UserService;
 
 import java.util.List;
@@ -26,17 +26,17 @@ public class AdminUserController {
     private final UserService userService;
 
     @GetMapping
-    public List<UserResponseDto> findAll(@RequestParam(required = false) List<Long> ids,
-                                         @RequestParam(defaultValue = "0",
+    public List<UserDto> findAll(@RequestParam(required = false) List<Long> ids,
+                                 @RequestParam(defaultValue = "0",
                                                        required = false) @PositiveOrZero Integer from,
-                                         @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
+                                 @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         log.debug("Контроллер AdminUserController; Метод findAll(); ids={}, from={}, size={}", ids, from, size);
 
         return userService.findAll(ids, from, size);
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> add(@RequestBody @Valid UserInputDto dto) {
+    public ResponseEntity<UserDto> add(@RequestBody @Valid NewUserRequest dto) {
         log.debug("Контроллер AdminUserController; Метод add(); dto={}", dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.add(dto));

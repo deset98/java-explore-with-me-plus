@@ -1,13 +1,15 @@
 package ru.practicum.ewm.user.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.ewm.user.model.User;
-import ru.practicum.ewm.user.dto.UserInputDto;
-import ru.practicum.ewm.user.dto.UserResponseDto;
+import ru.practicum.ewm.user.dto.NewUserRequest;
+import ru.practicum.ewm.user.dto.UserDto;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserResponseDto toResponseDto(User user);
+    UserDto toResponseDto(User user);
 
-    User toEntity(UserInputDto dto);
+    @Mapping(target = "id", ignore = true)
+    User toEntity(NewUserRequest dto);
 }
