@@ -8,8 +8,8 @@ import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.dto.RequestValidDto;
 import ru.practicum.ewm.user.model.User;
-import ru.practicum.ewm.user.dto.UserInputDto;
-import ru.practicum.ewm.user.dto.UserResponseDto;
+import ru.practicum.ewm.user.dto.NewUserRequest;
+import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public List<UserResponseDto> findAll(List<Long> ids, Integer from, Integer size) {
+    public List<UserDto> findAll(List<Long> ids, Integer from, Integer size) {
         log.debug("Сервис UserServiceImpl; Метод findAll(); ids={}, from={}, size={}", ids, from, size);
 
         RequestValidDto requestValidDto = new RequestValidDto(ids, from, size);
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto add(UserInputDto userInputDto) {
+    public UserDto add(NewUserRequest userInputDto) {
         log.debug("Сервис UserServiceImpl; Метод add(); userInputDto={}", userInputDto);
 
         String localpart = userInputDto.getEmail().substring(0, userInputDto.getEmail().indexOf('@'));
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private List<UserResponseDto> findAll(RequestValidDto dto) {
+    private List<UserDto> findAll(RequestValidDto dto) {
         return userRepository.findAllByParams(dto.getIds(), dto.getFrom(), dto.getSize()).stream()
                 .map(user -> userMapper.toResponseDto(user))
                 .collect(Collectors.toUnmodifiableList());

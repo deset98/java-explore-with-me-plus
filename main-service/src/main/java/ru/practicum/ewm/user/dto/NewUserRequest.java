@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInputDto {
+public class NewUserRequest {
     @NotBlank
     @Email
     @Pattern(regexp = ".*[^\\s].*")
