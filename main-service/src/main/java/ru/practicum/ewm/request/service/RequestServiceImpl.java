@@ -53,10 +53,10 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Достигнут лимит запросов на участие в событии");
         }
         if (!event.getRequestModeration()) {
-            Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.CONFIRMED));
+            Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toFullDto(event), Status.CONFIRMED));
             return RequestMapper.toResponseEntity(result);
         }
-        Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.PENDING));
+        Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toFullDto(event), Status.PENDING));
         return RequestMapper.toResponseEntity(result);
     }
 
