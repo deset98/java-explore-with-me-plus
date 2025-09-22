@@ -1,10 +1,12 @@
 package ru.practicum.ewm.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -14,9 +16,10 @@ public class ErrorHandler {
         return new ErrorResponse("Object not found", ex.getMessage());
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequestException(BadRequestException ex) {
-        return new ErrorResponse("Bad Request", ex.getMessage());
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictException(ConflictException ex) {
+        log.warn("Error", ex);
+        return new ErrorResponse("Object not found", ex.getMessage());
     }
 }
