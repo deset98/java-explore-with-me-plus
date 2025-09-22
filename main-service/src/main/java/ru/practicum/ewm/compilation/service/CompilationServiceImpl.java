@@ -8,6 +8,8 @@ import ru.practicum.ewm.compilation.model.CompilationMapper;
 import ru.practicum.ewm.compilation.model.NewCompilationDto;
 import ru.practicum.ewm.compilation.model.ResponseCompilationDto;
 import ru.practicum.ewm.compilation.repository.CompilationRepository;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.List;
@@ -18,12 +20,16 @@ import java.util.List;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public ResponseCompilationDto createCompilation(NewCompilationDto newCompilationDto) {
-        //получение списка Эвентов
+        List<Event> events = eventRepository.getEventsByIdIn(newCompilationDto.getEvents());
+        if (events.size() != newCompilationDto.getEvents().size()) {
+            throw new NotFoundException("Некоторые события не найдены");
+        }
 
-        Compilation saveData = CompilationMapper.toEntity(newCompilationDto, List.of());
+        Compilation saveData = CompilationMapper.toEntity(newCompilationDto, events);
         Compilation result = compilationRepository.save(saveData);
 
         return CompilationMapper.toResponseDto(result);
@@ -31,10 +37,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void deleteCompilation(Long compId) {
-        Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Подборка не найдена"));
-
-        compilationRepository.delete(compilation);
+        compilationRepository.deleteById(compId);
         log.info("Успешное удаление подборки!");
     }
 
@@ -42,9 +45,12 @@ public class CompilationServiceImpl implements CompilationService {
     public ResponseCompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto) {
         Compilation currentCompilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Подборка не найдена"));
-        //получение списка Эвентов
+        List<Event> events = eventRepository.getEventsByIdIn(newCompilationDto.getEvents());
+        if (events.size() != newCompilationDto.getEvents().size()) {
+            throw new NotFoundException("Некоторые события не найдены");
+        }
 
-        Compilation updatedCompilation = CompilationMapper.toEntity(newCompilationDto, List.of());
+        Compilation updatedCompilation = CompilationMapper.toEntity(newCompilationDto, events);
         CompilationMapper.updateFields(currentCompilation, updatedCompilation);
         Compilation result = compilationRepository.save(currentCompilation);
 

@@ -1,5 +1,6 @@
 package ru.practicum.ewm.exception;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,4 +20,12 @@ public class ErrorHandler {
     public ErrorResponse handleBadRequestException(BadRequestException ex) {
         return new ErrorResponse("Bad Request", ex.getMessage());
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleBadRequestException(ConflictException ex) {
+        return new ErrorResponse("Bad Request", ex.getMessage());
+    }
+
+    private record ErrorResponse(String error, String description){}
 }
