@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.ewm.category.model.CategoryDto;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.user.model.UserShortDto;
 
