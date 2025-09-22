@@ -1,7 +1,6 @@
 package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.exception.NotFoundException;
@@ -40,7 +39,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long userId) {
-        userRepository.delete(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found")));
+
+        if(userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
+        } else {
+            throw new NotFoundException("User userId=" + userId + " not found");
+        }
     }
 
     private List<UserResponseDto> findAll(RequestValidDto dto) {

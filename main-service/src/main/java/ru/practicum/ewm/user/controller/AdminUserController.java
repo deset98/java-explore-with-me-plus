@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.user.model.UserInputDto;
 import ru.practicum.ewm.user.model.UserResponseDto;
@@ -11,6 +12,7 @@ import ru.practicum.ewm.user.service.UserService;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class AdminUserController {
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> delete(@PathVariable Long userId) {
+        userService.delete(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
