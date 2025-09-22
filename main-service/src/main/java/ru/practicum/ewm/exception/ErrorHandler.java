@@ -20,4 +20,6 @@ public class ErrorHandler {
     public ErrorResponse handleBadRequestException(BadRequestException ex) {
         return new ErrorResponse("Bad Request", ex.getMessage());
     }
+
+    private record ErrorResponse(String error, String description){}
 }
