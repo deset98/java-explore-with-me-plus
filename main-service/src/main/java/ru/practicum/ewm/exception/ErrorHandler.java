@@ -15,8 +15,6 @@ public class ErrorHandler {
                 "Не найден объект.",
                 e.getMessage()
         );
-                "Object not found",
-                ex.getMessage());
     }
 
     @ExceptionHandler(BadRequestException.class)
