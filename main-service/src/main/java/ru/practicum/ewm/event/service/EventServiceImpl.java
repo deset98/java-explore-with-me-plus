@@ -60,7 +60,7 @@ public class EventServiceImpl implements EventService {
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
-        Page<Event> events = eventRepository.findAllByUserId(userId, pageable);
+        Page<Event> events = eventRepository.findAllByInitiator_Id(userId, pageable);
         return events.map(eventMapper::toShortDto).getContent();
     }
 
@@ -68,7 +68,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto findOne(Long userId, Long eventId) {
         log.debug("В EventServiceImpl вызван метод для ПОЛУЧЕНИЯ event id={} от user id={}", eventId, userId);
 
-        Event event = eventRepository.findByUserIdAndEventId(userId, eventId)
+        Event event = eventRepository.findByInitiatorIdAndId(userId, eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
         return eventMapper.toFullDto(event);
     }
@@ -79,7 +79,7 @@ public class EventServiceImpl implements EventService {
 
         this.checkEventDateForUpdate(updEventUserRequest);
 
-        Event event = eventRepository.findByUserIdAndEventId(userId, eventId)
+        Event event = eventRepository.findByInitiatorIdAndId(userId, eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
         if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
             throw new ForbiddenException("Event id={} нельзя обновить пока оно опубликовано", event.getId());
