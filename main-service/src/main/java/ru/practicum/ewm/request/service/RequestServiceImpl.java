@@ -7,8 +7,6 @@ import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.exception.ConflictException;
-import ru.practicum.ewm.exception.ErrorHandler;
-import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestMapper;
@@ -17,7 +15,7 @@ import ru.practicum.ewm.request.model.Status;
 import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
-import ru.practicum.ewm.user.service.UserService;
+import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final EventService eventService;
     private final EventMapper eventMapper;
@@ -35,7 +33,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ResponseRequestDto createRequest(Long userId, Long eventId) {
-        User user = userMapper.toEntity(userService.findById(userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         EventFullDto event = eventService.findOne(userId, eventId);
         List<Request> requests = requestRepository.findAllByEventId(eventId);
 
@@ -63,14 +62,16 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ResponseRequestDto> getRequests(Long userId) {
-        User user = userMapper.toEntity(userService.findById(userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         List<Request> result = requestRepository.findAllByRequester(user);
         return result.stream().map(RequestMapper::toResponseEntity).collect(Collectors.toList());
     }
 
     @Override
     public ResponseRequestDto cancelRequest(Long userId, Long requestId) {
-        User user = userMapper.toEntity(userService.findById(userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден"));
         Request result = requestRepository.save(RequestMapper.toEntity(user, request.getEvent(), Status.REJECTED)); //сохранение записи
