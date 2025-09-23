@@ -32,7 +32,8 @@ public class AdminCategoryController {
     }
 
     @PatchMapping("/{catId}")
-    public CategoryDto updateCategory(@PathVariable Long catId, @Valid @RequestBody CategoryParamDto categoryParamDto) {
+    public CategoryDto updateCategory(@PathVariable Long catId,
+                                      @Valid @RequestBody CategoryParamDto categoryParamDto) {
         return categoryService.updateCategory(catId, categoryParamDto);
     }
 }

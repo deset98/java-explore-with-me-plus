@@ -47,10 +47,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + catId + " не найдена"));
 
-        if (categoryRepository.existsByName(categoryParamDto.getName())) {
-            throw new ConflictException("Категория с именем " + categoryParamDto.getName() + " уже существует");
-        }
-
         category.setName(categoryParamDto.getName());
         category = categoryRepository.save(category);
         return categoryMapper.toCategoryDto(category);
