@@ -1,10 +1,12 @@
 package ru.practicum.ewm.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -24,12 +26,10 @@ public class ErrorHandler {
                 ex.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.FORBIDDEN) //403
-    public ErrorResponse handleValidationException(final ForbiddenException e) {
-        return new ErrorResponse(
-                "Объект не доступен.",
-                e.getMessage()
-        );
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictException(ConflictException ex) {
+        log.warn("Error", ex);
+        return new ErrorResponse("Object not found", ex.getMessage());
     }
 }
