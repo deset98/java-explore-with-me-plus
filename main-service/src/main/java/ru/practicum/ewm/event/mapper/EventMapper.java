@@ -1,23 +1,22 @@
 package ru.practicum.ewm.event.mapper;
 
 import org.mapstruct.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.*;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdEventUserRequest;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.user.mapper.UserMapper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Mapper(componentModel = "spring",
-        uses = {LocationMapper.class, CategoryMapper.class, UserMapper.class})
+        uses = {LocationMapper.class, /*CategoryMapper.class,*/ UserMapper.class})
 public interface EventMapper {
 
+    //    @Mapping(target = "id", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)

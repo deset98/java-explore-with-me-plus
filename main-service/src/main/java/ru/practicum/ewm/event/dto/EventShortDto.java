@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.ewm.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +19,7 @@ public class EventShortDto {
 
     private String annotation;
 
-    private CategoryDto category;
+//    private CategoryDto category;
 
     private Long confirmedRequests;
 
