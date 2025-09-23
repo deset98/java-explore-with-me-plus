@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException ex) {
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND) //404
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         return new ErrorResponse(
-                "Object not found",
-                ex.getMessage());
+                "Не найден объект.",
+                e.getMessage()
+        );
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -32,4 +33,6 @@ public class ErrorHandler {
         log.warn("Error", ex);
         return new ErrorResponse("Object not found", ex.getMessage());
     }
+
+    private record ErrorResponse(String error, String description){}
 }
