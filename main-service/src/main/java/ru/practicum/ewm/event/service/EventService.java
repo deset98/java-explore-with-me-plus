@@ -1,10 +1,9 @@
 package ru.practicum.ewm.event.service;
 
-import jakarta.validation.constraints.Positive;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.event.dto.UpdEventUserRequest;
+import ru.practicum.ewm.event.dto.UpdEventRequest;
 
 import java.util.List;
 
@@ -15,5 +14,5 @@ public interface EventService {
 
     EventFullDto findOne(Long userId, Long eventId);
 
-    EventFullDto update(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
+    EventFullDto update(Long userId, Long eventId, UpdEventRequest updEventRequest);
 }

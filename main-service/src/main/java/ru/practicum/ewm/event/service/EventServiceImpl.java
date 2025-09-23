@@ -75,22 +75,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto update(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest) {
+    public EventFullDto update(Long userId, Long eventId, UpdEventRequest updEventRequest) {
         log.debug("В EventServiceImpl вызван метод для ОБНОВЛЕНИЯ event");
 
-        this.checkEventDateForUpdate(updEventUserRequest);
+        this.checkEventDateForUpdate(updEventRequest);
 
         Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
         if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
             throw new ForbiddenException("Event id={} нельзя обновить пока оно опубликовано", event.getId());
         }
-        if (updEventUserRequest.getCategoryId() != null) {
-            event.setCategory(this.findCategory(updEventUserRequest.getCategoryId()));
+        if (updEventRequest.getCategory() != null) {
+            event.setCategory(this.findCategory(updEventRequest.getCategory()));
         }
         // StateAction??
 
-        eventMapper.updateFromDto(updEventUserRequest, event);
+        eventMapper.updateFromDto(updEventRequest, event);
         event = eventRepository.save(event);
         return eventMapper.toFullDto(event);
     }
@@ -113,11 +113,11 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void checkEventDateForUpdate(UpdEventUserRequest updEventUserRequest) {
+    private void checkEventDateForUpdate(UpdEventRequest updEventRequest) {
         log.debug("Проверка даты при ОБНОВЛЕНИИ");
 
-        if (updEventUserRequest.getEventDate() != null) {
-            this.startDateIsValid(updEventUserRequest.getEventDate());
+        if (updEventRequest.getEventDate() != null) {
+            this.startDateIsValid(updEventRequest.getEventDate());
         }
     }
 
