@@ -32,7 +32,7 @@ public class PrivateEventController {
     @PostMapping
     public ResponseEntity<EventFullDto> create(@PathVariable("userId") @NotNull @Positive Long userId,
                                                @RequestBody @Valid final NewEventDto newEventDto) {
-        log.debug("В PrivateEventController от user = {} поступил запрос на СОЗДАНИЕ event: {}", userId, newEventDto);
+        log.debug("PrivateEventController; метод create(); userId = {}; newEventDto = {}", userId, newEventDto);
 
         EventFullDto result = eventService.create(userId, newEventDto);
         return ResponseEntity
@@ -45,8 +45,7 @@ public class PrivateEventController {
     public ResponseEntity<List<EventShortDto>> findAll(@PathVariable("userId") @NotNull @Positive Long userId,
                                                        @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                        @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
-        log.debug("В PrivateEventController от user = {} поступил запрос на ПОЛУЧЕНИЕ списка events; " +
-                "from={}, size={}", userId, from, size);
+        log.debug("PrivateEventController; метод findAll(); userId={}, from={}, size={}", userId, from, size);
 
         List<EventShortDto> result = eventService.findAll(userId, from, size);
         return ResponseEntity.ok(result);
@@ -57,7 +56,7 @@ public class PrivateEventController {
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> find(@PathVariable("userId") @NotNull @Positive Long userId,
                                              @PathVariable("eventId") @NotNull @Positive Long eventId) {
-        log.debug("В PrivateEventController от user = {} поступил запрос на ПОЛУЧЕНИЕ event id={}", userId, eventId);
+        log.debug("PrivateEventController; метод find(); userId={}, eventId={}", userId, eventId);
 
         EventFullDto result = eventService.findOne(userId, eventId);
         return ResponseEntity.ok(result);
@@ -69,7 +68,7 @@ public class PrivateEventController {
     public ResponseEntity<EventFullDto> update(@PathVariable("userId") @NotNull @Positive Long userId,
                                                @PathVariable("eventId") @NotNull @Positive Long eventId,
                                                @RequestBody @Valid final UpdEventUserRequest updEventUserRequest) {
-        log.debug("В PrivateEventController от user = {} поступил запрос на ОБНОВЛЕНИЕ event id={}", userId, eventId);
+        log.debug("PrivateEventController; метод update(); userId={}, eventId={}", userId, eventId);
 
         EventFullDto result = eventService.update(userId, eventId, updEventUserRequest);
         return ResponseEntity.ok(result);

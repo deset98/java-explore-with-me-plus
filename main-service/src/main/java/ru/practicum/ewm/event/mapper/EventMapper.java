@@ -1,6 +1,7 @@
 package ru.practicum.ewm.event.mapper;
 
 import org.mapstruct.*;
+import ru.practicum.ewm.category.mapper.CategoryManualMapper;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
@@ -13,14 +14,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Mapper(componentModel = "spring",
-        uses = {LocationMapper.class, /*CategoryMapper.class,*/ UserMapper.class})
+        uses = {CategoryManualMapper.class, UserMapper.class})
 public interface EventMapper {
 
-    //    @Mapping(target = "id", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "location", ignore = true)
     @Mapping(target = "eventDate", expression = "java(toInstant(newEventDto.getEventDate()))")
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
@@ -40,6 +41,7 @@ public interface EventMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
     @Mapping(target = "eventDate", expression = "java(toInstant(updEventUserRequest.getEventDate()))")
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
@@ -53,6 +55,6 @@ public interface EventMapper {
     }
 
     default LocalDateTime toLocalDateTime(Instant instant) {
-        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+        return instant != null ? LocalDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
     }
 }
