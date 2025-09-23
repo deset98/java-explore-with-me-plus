@@ -11,12 +11,25 @@ public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException ex) {
-        return new ErrorResponse("Object not found", ex.getMessage());
+        return new ErrorResponse(
+                "Object not found",
+                ex.getMessage());
     }
 
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequestException(BadRequestException ex) {
-        return new ErrorResponse("Bad Request", ex.getMessage());
+        return new ErrorResponse(
+                "Bad Request",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN) //403
+    public ErrorResponse handleValidationException(final ForbiddenException e) {
+        return new ErrorResponse(
+                "Объект не доступен.",
+                e.getMessage()
+        );
     }
 }
