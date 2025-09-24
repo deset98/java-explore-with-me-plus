@@ -38,7 +38,6 @@ public class PrivateEventController {
         return ResponseEntity
                 .created(URI.create("/events/" + result.getId()))
                 .body(result);
-        // 400 и 409
     }
 
     @GetMapping
@@ -49,8 +48,6 @@ public class PrivateEventController {
 
         List<EventShortDto> result = eventService.findAll(userId, from, size);
         return ResponseEntity.ok(result);
-        // 400
-        // прикрутить модуль статистики
     }
 
     @GetMapping("/{eventId}")
@@ -60,8 +57,6 @@ public class PrivateEventController {
 
         EventFullDto result = eventService.findOne(userId, eventId);
         return ResponseEntity.ok(result);
-        // 400
-        // прикрутить модуль статистики
     }
 
     @PatchMapping("/{eventId}")
@@ -73,7 +68,6 @@ public class PrivateEventController {
 
         EventFullDto result = eventService.userUpdate(userId, eventId, updEventUserRequest);
         return ResponseEntity.ok(result);
-        // 400 и 409
     }
 
 //    @GetMapping("/{eventId}/requests")
