@@ -8,8 +8,6 @@ import ru.practicum.ewm.compilation.model.NewCompilationDto;
 import ru.practicum.ewm.compilation.model.CompilationDto;
 import ru.practicum.ewm.compilation.service.CompilationService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("admin/compilations")
 @RequiredArgsConstructor
@@ -25,8 +23,8 @@ public class AdminCompilationController {
 
     @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public List<CompilationDto> deleteCompilation(@PathVariable Long compId) {
-        return compilationService.deleteCompilation(compId);
+    public void deleteCompilation(@PathVariable Long compId) {
+        compilationService.deleteCompilation(compId);
     }
 
     @PatchMapping("/{compId}")

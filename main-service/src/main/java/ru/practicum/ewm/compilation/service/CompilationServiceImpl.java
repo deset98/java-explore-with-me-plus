@@ -14,7 +14,6 @@ import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,10 +40,9 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public List<CompilationDto> deleteCompilation(Long compId) {
+    public void deleteCompilation(Long compId) {
         compilationRepository.deleteById(compId);
-
-        return compilationRepository.findAll().stream().map(compilationMapper::toCompilationDto).collect(Collectors.toList());
+        compilationRepository.findAll().stream().map(compilationMapper::toCompilationDto).toList();
     }
 
     @Override
