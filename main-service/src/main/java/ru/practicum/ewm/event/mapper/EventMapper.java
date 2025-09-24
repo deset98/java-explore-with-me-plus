@@ -14,6 +14,7 @@ import java.time.ZoneOffset;
         uses = {CategoryManualMapper.class, UserMapper.class})
 public interface EventMapper {
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
@@ -22,6 +23,12 @@ public interface EventMapper {
     @Mapping(target = "eventDate", expression = "java(toInstantForMap(newEventDto.getEventDate()))")
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "paid", expression = "java(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)")
+    @Mapping(target = "participantLimit",
+            expression = "java(newEventDto.getParticipantLimit() != null ? newEventDto.getParticipantLimit() : 0)")
+    @Mapping(target = "requestModeration",
+            expression = "java(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true)")
+
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "views", ignore = true)
     Event toEntity(NewEventDto newEventDto);

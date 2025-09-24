@@ -84,8 +84,11 @@ public class EventServiceImpl implements EventService {
 
         this.checkEventDateForUpdate(updDto);
 
-        Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
+        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
+
+        log.debug("Найден Event в репозитории; event={}", event);
+
         if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
             throw new ForbiddenException("Event id={} нельзя обновить пока оно опубликовано", event.getId());
         }
@@ -93,9 +96,11 @@ public class EventServiceImpl implements EventService {
             event.setCategory(this.findCategory(updDto.getCategory()));
         }
 
-        switch (updDto.getStateAction()) {
-            case SEND_TO_REVIEW -> event.setState(State.PENDING);
-            case CANCEL_REVIEW -> event.setState(State.CANCELED);
+        if (updDto.getStateAction() != null) {
+            switch (updDto.getStateAction()) {
+                case SEND_TO_REVIEW -> event.setState(State.PENDING);
+                case CANCEL_REVIEW -> event.setState(State.CANCELED);
+            }
         }
 
         eventMapper.updateFromDto(updDto, event);
@@ -116,26 +121,28 @@ public class EventServiceImpl implements EventService {
 
         this.checkEventDateForPublish(updDto.getEventDate());
 
-        switch (updDto.getStateAction()) {
-            case PUBLISH_EVENT -> {
-                if (event.getState().equals(State.PENDING)) {
-                    event.setState(State.PUBLISHED);
-                    event.setPublishedOn(Instant.now());
-                } else {
-                    throw new ConditionNotMetException("Для публикации Event статус должен быть PENDING");
-                }
+        if (updDto.getStateAction() != null) {
+            switch (updDto.getStateAction()) {
+                case PUBLISH_EVENT -> {
+                    if (event.getState().equals(State.PENDING)) {
+                        event.setState(State.PUBLISHED);
+                        event.setPublishedOn(Instant.now());
+                    } else {
+                        throw new ConditionNotMetException("Для публикации Event статус должен быть PENDING");
+                    }
 
-                log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
-                        event.getState(), event.getPublishedOn());
-            }
-            case REJECT_EVENT -> {
-                if (event.getState().equals(State.PENDING)) {
-                    event.setState(State.CANCELED);
-                } else if (event.getState().equals(State.PUBLISHED)) {
-                    throw new ConditionNotMetException("Опубликованные Event не могут быть отклонены");
+                    log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
+                            event.getState(), event.getPublishedOn());
                 }
+                case REJECT_EVENT -> {
+                    if (event.getState().equals(State.PENDING)) {
+                        event.setState(State.CANCELED);
+                    } else if (event.getState().equals(State.PUBLISHED)) {
+                        throw new ConditionNotMetException("Опубликованные Event не могут быть отклонены");
+                    }
 
-                log.debug("Для Event назначен статус={}", event.getState());
+                    log.debug("Для Event назначен статус={}", event.getState());
+                }
             }
         }
 
@@ -144,13 +151,6 @@ public class EventServiceImpl implements EventService {
         log.debug("метод adminUpdate(); Event обновлен в репозитории event={}", event);
 
         return eventMapper.toFullDto(event);
-    }
-
-    private void rejectEvent(Event event) {
-        if (event.getState() == State.PUBLISHED) {
-            throw new ConditionNotMetException("Опубликованные события не могут быть отклонены");
-        }
-        event.setState(State.CANCELED);
     }
 
     private User findUser(Long userId) {
@@ -177,7 +177,7 @@ public class EventServiceImpl implements EventService {
     private void startDateIsValid(LocalDateTime eventDate) {
         log.debug("Проверка даты при СОЗДАНИИ");
 
-        if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ForbiddenException("Дата Event при СОЗДАНИИ должна быть в будущем, мин. через 2 часа");
         }
     }

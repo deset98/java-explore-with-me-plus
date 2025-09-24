@@ -40,7 +40,6 @@ public class UpdEventAdminRequest {
 
     private Boolean requestModeration;
 
-    @NotNull
     private StateAction stateAction;
 
     @Size(min = 3, max = 120)
