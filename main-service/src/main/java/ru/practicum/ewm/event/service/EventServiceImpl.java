@@ -15,11 +15,13 @@ import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.exception.ConditionNotMetException;
 import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -74,51 +76,125 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
+    @Transactional
     @Override
-    public EventFullDto update(Long userId, Long eventId, UpdEventRequest updEventRequest) {
-        log.debug("В EventServiceImpl вызван метод для ОБНОВЛЕНИЯ event");
+    public EventFullDto userUpdate(Long userId, Long eventId, UpdEventUserRequest updDto) {
+        log.debug("Сервис EventServiceImpl; метод userUpdate(); userId={}, eventId: {}, dto={}",
+                userId, eventId, updDto);
 
-        this.checkEventDateForUpdate(updEventRequest);
+        this.checkEventDateForUpdate(updDto);
 
         Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
         if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
             throw new ForbiddenException("Event id={} нельзя обновить пока оно опубликовано", event.getId());
         }
-        if (updEventRequest.getCategory() != null) {
-            event.setCategory(this.findCategory(updEventRequest.getCategory()));
+        if (updDto.getCategory() != null) {
+            event.setCategory(this.findCategory(updDto.getCategory()));
         }
-        // StateAction??
 
-        eventMapper.updateFromDto(updEventRequest, event);
+        switch (updDto.getStateAction()) {
+            case SEND_TO_REVIEW -> event.setState(State.PENDING);
+            case CANCEL_REVIEW -> event.setState(State.CANCELED);
+        }
+
+        eventMapper.updateFromDto(updDto, event);
         event = eventRepository.save(event);
+
+        log.debug("Метод userUpdate(); Event обновлен в репозитории event={}", event);
+
         return eventMapper.toFullDto(event);
     }
 
+    @Transactional
+    @Override
+    public EventFullDto adminUpdate(Long eventId, UpdEventAdminRequest updDto) {
+        log.debug("Сервис EventServiceImpl; метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
+
+        Event event = this.findEvent(eventId);
+        eventMapper.updateFromDto(updDto, event);
+
+        this.checkEventDateForPublish(updDto.getEventDate());
+
+        switch (updDto.getStateAction()) {
+            case PUBLISH_EVENT -> {
+                if (event.getState().equals(State.PENDING)) {
+                    event.setState(State.PUBLISHED);
+                    event.setPublishedOn(Instant.now());
+                } else {
+                    throw new ConditionNotMetException("Для публикации Event статус должен быть PENDING");
+                }
+
+                log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
+                        event.getState(), event.getPublishedOn());
+            }
+            case REJECT_EVENT -> {
+                if (event.getState().equals(State.PENDING)) {
+                    event.setState(State.CANCELED);
+                } else if (event.getState().equals(State.PUBLISHED)) {
+                    throw new ConditionNotMetException("Опубликованные Event не могут быть отклонены");
+                }
+
+                log.debug("Для Event назначен статус={}", event.getState());
+            }
+        }
+
+        event = eventRepository.save(event);
+
+        log.debug("метод adminUpdate(); Event обновлен в репозитории event={}", event);
+
+        return eventMapper.toFullDto(event);
+    }
+
+    private void rejectEvent(Event event) {
+        if (event.getState() == State.PUBLISHED) {
+            throw new ConditionNotMetException("Опубликованные события не могут быть отклонены");
+        }
+        event.setState(State.CANCELED);
+    }
+
     private User findUser(Long userId) {
+        log.debug("Поиск User id={} в репозитории", userId);
+
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User id={} не найден", userId));
     }
 
     private Category findCategory(Long categoryId) {
+        log.debug("Поиск Category id={} в репозитории", categoryId);
+
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Объект Category id={} не найден", categoryId));
+    }
+
+    private Event findEvent(Long eventId) {
+        log.debug("Поиск Event id={} в репозитории", eventId);
+
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Объект Event id={} не найден", eventId));
     }
 
     private void startDateIsValid(LocalDateTime eventDate) {
         log.debug("Проверка даты при СОЗДАНИИ");
 
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ForbiddenException("Event должно быть в будущем, минимум через 2 часа");
+            throw new ForbiddenException("Дата Event при СОЗДАНИИ должна быть в будущем, мин. через 2 часа");
         }
     }
 
-    private void checkEventDateForUpdate(UpdEventRequest updEventRequest) {
-        log.debug("Проверка даты при ОБНОВЛЕНИИ");
+    private void checkEventDateForUpdate(UpdEventUserRequest updDto) {
+        log.debug("Проверка даты Event при ОБНОВЛЕНИИ");
 
-        if (updEventRequest.getEventDate() != null) {
-            this.startDateIsValid(updEventRequest.getEventDate());
+        if (updDto.getEventDate() != null) {
+            this.startDateIsValid(updDto.getEventDate());
         }
     }
 
+    private void checkEventDateForPublish(LocalDateTime eventDate) {
+        log.debug("Проверка даты Event при ПУБЛИКАЦИИ");
+
+        if (eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+            throw new ForbiddenException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
+        }
+    }
 }
