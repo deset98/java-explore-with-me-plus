@@ -2,10 +2,9 @@ package ru.practicum.ewm.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.event.dto.EventFullDto;
-import ru.practicum.ewm.event.mapper.EventMapper;
+import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
-import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.model.Request;
@@ -19,6 +18,7 @@ import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,24 +27,27 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final EventService eventService;
-    private final EventMapper eventMapper;
+    private final EventRepository eventRepository;
 
 
     @Override
     public ResponseRequestDto createRequest(Long userId, Long eventId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        EventFullDto event = eventService.findOne(userId, eventId);
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Ивент не найден"));
         List<Request> requests = requestRepository.findAllByEventId(eventId);
+        Optional<Event> initiatorEvent = eventRepository.findByIdAndInitiator_Id(userId, eventId);
 
         boolean requestExists = requests.stream()
                 .anyMatch(r -> r.getRequester().getId().equals(userId));
         if  (requestExists) {
             throw new ConflictException("Запрос уже создан ранее");
         }
-        if (Objects.equals(event.getInitiator().getId(), userMapper.toUserShortDto(user).getId())) {
-            throw new ConflictException("Инициатор события не может добавить запрос на участие в своём событии");
+        if (initiatorEvent.isPresent()) {
+            if (Objects.equals(initiatorEvent.get().getInitiator().getId(), userMapper.toUserShortDto(user).getId())) {
+                throw new ConflictException("Инициатор события не может добавить запрос на участие в своём событии");
+            }
         }
         if (!event.getState().equals(State.PUBLISHED)) {
             throw new ConflictException("Нельзя участвовать в неопубликованном событии");
@@ -53,10 +56,10 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Достигнут лимит запросов на участие в событии");
         }
         if (!event.getRequestModeration()) {
-            Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.CONFIRMED));
+            Request result = requestRepository.save(RequestMapper.toEntity(user, event, Status.CONFIRMED));
             return RequestMapper.toResponseEntity(result);
         }
-        Request result = requestRepository.save(RequestMapper.toEntity(user, eventMapper.toEntity(event), Status.PENDING));
+        Request result = requestRepository.save(RequestMapper.toEntity(user, event, Status.PENDING));
         return RequestMapper.toResponseEntity(result);
     }
 
@@ -74,7 +77,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден"));
-        Request result = requestRepository.save(RequestMapper.toEntity(user, request.getEvent(), Status.REJECTED)); //сохранение записи
+        Request result = requestRepository.save(RequestMapper.toEntity(user, request.getEvent(), Status.REJECTED));
         return RequestMapper.toResponseEntity(result);
     }
 }

@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Сервис UserServiceImpl; Метод delete(); userId={}", userId);
 
 
-        if(userRepository.existsById(userId)) {
+        if (userRepository.existsById(userId)) {
             userRepository.deleteById(userId);
         } else {
             throw new NotFoundException("User userId=" + userId + " not found");

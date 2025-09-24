@@ -34,7 +34,7 @@ public interface EventMapper {
     @Mapping(target = "confirmedRequests", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate", expression = "java(toInstant(newEventDto.getEventDate()))")
+    @Mapping(target = "eventDate", expression = "java(toInstant(eventFullDto.getEventDate()))")
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "state", ignore = true)

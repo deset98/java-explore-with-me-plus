@@ -66,7 +66,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto findOne(Long userId, Long eventId) {
+    public EventFullDto findByIdAndInitiator_Id(Long userId, Long eventId) {
         log.debug("В EventServiceImpl вызван метод для ПОЛУЧЕНИЯ event id={} от user id={}", eventId, userId);
 
         Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
