@@ -1,15 +1,15 @@
 package ru.practicum.ewm.category.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.model.Category;
 
-@Component
-public class CategoryMapper {
-    public CategoryDto toCategoryDto(Category category) {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setName(category.getName());
-        categoryDto.setId(category.getId());
-        return categoryDto;
-    }
+@Mapper(componentModel = "spring")
+public interface CategoryMapper {
+
+    @Mapping(target = "id", ignore = true)
+    CategoryDto toDto(Category category);
+
+    Category toEntity(CategoryDto categoryDto);
 }
