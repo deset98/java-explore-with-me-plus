@@ -15,7 +15,7 @@ public class PrivateRequestController {
     private final RequestService requestService;
 
     @PostMapping
-    public ResponseRequestDto createRequest(@PathVariable Long userId, @RequestBody Long eventId) {
+    public ResponseRequestDto createRequest(@PathVariable Long userId, @RequestParam Long eventId) {
         return requestService.createRequest(userId, eventId);
     }
 

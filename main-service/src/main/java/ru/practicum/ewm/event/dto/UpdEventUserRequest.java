@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.event.validation.FutureAfterHours;
 
 import java.time.LocalDateTime;
 
@@ -37,7 +36,7 @@ public class UpdEventUserRequest {
     private LocalDateTime eventDate;
 
     @NotNull
-    private LocationDto location;
+    private Location location;
 
     @NotNull
     private Boolean paid;

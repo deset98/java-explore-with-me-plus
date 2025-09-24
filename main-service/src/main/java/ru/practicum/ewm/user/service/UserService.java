@@ -1,17 +1,16 @@
 package ru.practicum.ewm.user.service;
 
-import org.springframework.http.ResponseEntity;
-import ru.practicum.ewm.user.model.UserInputDto;
-import ru.practicum.ewm.user.model.UserResponseDto;
+import ru.practicum.ewm.user.dto.NewUserRequest;
+import ru.practicum.ewm.user.dto.UserDto;
 
 import java.util.List;
 
 public interface UserService {
-    List<UserResponseDto> findAll(List<Long> ids, Integer from, Integer size);
+    List<UserDto> findAll(List<Long> ids, Integer from, Integer size);
 
-    UserResponseDto findById(Long id);
+    UserDto findById(Long id);
 
-    UserResponseDto add(UserInputDto userInputDto);
+    UserDto add(NewUserRequest userInputDto);
 
     void delete(Long userId);
 }

@@ -1,14 +1,17 @@
 package ru.practicum.ewm.compilation.service;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.compilation.model.NewCompilationDto;
-import ru.practicum.ewm.compilation.model.ResponseCompilationDto;
+import ru.practicum.ewm.compilation.model.CompilationDto;
+
+import java.util.List;
 
 @Service
 public interface CompilationService {
-    ResponseCompilationDto createCompilation(NewCompilationDto newCompilationDto);
+    CompilationDto createCompilation(NewCompilationDto newCompilationDto);
 
-    void deleteCompilation(Long compId);
+    List<CompilationDto> deleteCompilation(Long compId);
 
-    ResponseCompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto);
+    CompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto);
 }

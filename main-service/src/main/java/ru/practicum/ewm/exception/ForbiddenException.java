@@ -1,10 +1,6 @@
 package ru.practicum.ewm.exception;
 
-import org.springframework.http.HttpStatus;
-
 public class ForbiddenException extends RuntimeException {
-
-
     public ForbiddenException(String message) {
         super(message);
     }

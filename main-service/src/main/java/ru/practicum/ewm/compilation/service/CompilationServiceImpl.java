@@ -6,13 +6,15 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.compilation.model.CompilationMapper;
 import ru.practicum.ewm.compilation.model.NewCompilationDto;
-import ru.practicum.ewm.compilation.model.ResponseCompilationDto;
+import ru.practicum.ewm.compilation.model.CompilationDto;
 import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.NotFoundException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,39 +23,48 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
+    private final CompilationMapper compilationMapper;
 
     @Override
-    public ResponseCompilationDto createCompilation(NewCompilationDto newCompilationDto) {
+    public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         List<Event> events = eventRepository.getEventsByIdIn(newCompilationDto.getEvents());
         if (events.size() != newCompilationDto.getEvents().size()) {
             throw new NotFoundException("Некоторые события не найдены");
         }
+        log.info(events.toString());
 
-        Compilation saveData = CompilationMapper.toEntity(newCompilationDto, events);
+        Compilation saveData = compilationMapper.toEntity(newCompilationDto, events);
         Compilation result = compilationRepository.save(saveData);
 
-        return CompilationMapper.toResponseDto(result);
+        log.info(result.getEvents().toString());
+        return compilationMapper.toCompilationDto(result);
     }
 
     @Override
-    public void deleteCompilation(Long compId) {
+    public List<CompilationDto> deleteCompilation(Long compId) {
         compilationRepository.deleteById(compId);
-        log.info("Успешное удаление подборки!");
+
+        return compilationRepository.findAll().stream().map(compilationMapper::toCompilationDto).collect(Collectors.toList());
     }
 
     @Override
-    public ResponseCompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto) {
+    public CompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto) {
         Compilation currentCompilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Подборка не найдена"));
         List<Event> events = eventRepository.getEventsByIdIn(newCompilationDto.getEvents());
-        if (events.size() != newCompilationDto.getEvents().size()) {
-            throw new NotFoundException("Некоторые события не найдены");
+
+        if (newCompilationDto.getEvents().size() == 1 && newCompilationDto.getEvents().getFirst() == 0) {
+            events = Collections.emptyList();
+        } else {
+            if (events.size() != newCompilationDto.getEvents().size()) {
+                throw new NotFoundException("Некоторые события не найдены");
+            }
         }
 
-        Compilation updatedCompilation = CompilationMapper.toEntity(newCompilationDto, events);
-        CompilationMapper.updateFields(currentCompilation, updatedCompilation);
+        Compilation updatedCompilation = compilationMapper.toEntity(newCompilationDto, events);
+        compilationMapper.updateFields(currentCompilation, updatedCompilation);
         Compilation result = compilationRepository.save(currentCompilation);
 
-        return CompilationMapper.toResponseDto(result);
+        return compilationMapper.toCompilationDto(result);
     }
 }

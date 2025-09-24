@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.event.model.Location;
-import ru.practicum.ewm.event.validation.FutureAfterHours;
 
 import java.time.LocalDateTime;
 
@@ -24,8 +22,8 @@ public class NewEventDto {
     @Size(min = 20, max = 2000)
     private String annotation;
 
-    @NotNull
-    private Long categoryId;
+//    @NotNull
+    private Long category;
 
     @NotBlank
     @Size(min = 20, max = 7000)
@@ -38,7 +36,7 @@ public class NewEventDto {
     private LocalDateTime eventDate;
 
     @NotNull
-    private LocationDto location;
+    private Location location;
 
     @NotNull
     private Boolean paid;

@@ -11,9 +11,9 @@ import java.util.List;
 public interface EventService {
     EventFullDto create(Long userId, NewEventDto newEventDto);
 
-    List<EventShortDto> findAll(Long userId, int from, int size);
+    EventFullDto findByIdAndInitiator_Id(Long userId, Long eventId);
 
-    EventFullDto findOne(Long userId, Long eventId);
+    List<EventShortDto> findAll(Long userId, int from, int size);
 
     EventFullDto update(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
 }

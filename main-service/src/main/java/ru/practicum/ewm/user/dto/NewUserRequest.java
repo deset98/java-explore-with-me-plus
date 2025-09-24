@@ -1,4 +1,4 @@
-package ru.practicum.ewm.user.model;
+package ru.practicum.ewm.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInputDto {
+public class NewUserRequest {
     @NotBlank
     @Email
     @Pattern(regexp = ".*[^\\s].*")

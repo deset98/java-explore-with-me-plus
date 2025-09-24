@@ -3,6 +3,7 @@ package ru.practicum.ewm.event.model;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.event.dto.Location;
 import ru.practicum.ewm.user.model.User;
 
 import java.time.Instant;
@@ -58,12 +59,15 @@ public class Event {
     @ToString.Exclude
     private User initiator;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_events_locations"))
-    @ToString.Exclude
+    @Embedded
     private Location location;
+
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "location_id",
+//            nullable = false,
+//            foreignKey = @ForeignKey(name = "fk_events_locations"))
+//    @ToString.Exclude
+//    private LocationENTITY locationENTITY;
 
     @Column(nullable = false)
     private Boolean paid;

@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
-import ru.practicum.ewm.event.dto.EventFullDto;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.event.dto.UpdEventUserRequest;
+import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
@@ -45,12 +42,16 @@ public class EventServiceImpl implements EventService {
 
         this.startDateIsValid(newEventDto.getEventDate());
         User user = this.findUser(userId);
-        Category category = this.findCategory(newEventDto.getCategoryId());
+        Category category = this.findCategory(newEventDto.getCategory());
 
         Event event = eventMapper.toEntity(newEventDto);
+        event.setLocation(newEventDto.getLocation());
         event.setInitiator(user);
         event.setCategory(category);
         event = eventRepository.save(event);
+
+        log.debug("Создан event={}", event);
+
         return eventMapper.toFullDto(event);
     }
 
@@ -60,15 +61,15 @@ public class EventServiceImpl implements EventService {
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
-        Page<Event> events = eventRepository.findAllByUserId(userId, pageable);
+        Page<Event> events = eventRepository.findAllByInitiator_Id(userId, pageable);
         return events.map(eventMapper::toShortDto).getContent();
     }
 
     @Override
-    public EventFullDto findOne(Long userId, Long eventId) {
+    public EventFullDto findByIdAndInitiator_Id(Long userId, Long eventId) {
         log.debug("В EventServiceImpl вызван метод для ПОЛУЧЕНИЯ event id={} от user id={}", eventId, userId);
 
-        Event event = eventRepository.findByUserIdAndEventId(userId, eventId)
+        Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
         return eventMapper.toFullDto(event);
     }
@@ -79,7 +80,7 @@ public class EventServiceImpl implements EventService {
 
         this.checkEventDateForUpdate(updEventUserRequest);
 
-        Event event = eventRepository.findByUserIdAndEventId(userId, eventId)
+        Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
         if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
             throw new ForbiddenException("Event id={} нельзя обновить пока оно опубликовано", event.getId());
