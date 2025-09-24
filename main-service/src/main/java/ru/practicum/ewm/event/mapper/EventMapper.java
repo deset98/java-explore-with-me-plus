@@ -29,6 +29,18 @@ public interface EventMapper {
     @Mapping(target = "views", ignore = true)
     Event toEntity(NewEventDto newEventDto);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    @Mapping(target = "eventDate", expression = "java(toInstant(newEventDto.getEventDate()))")
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    Event toEntity(EventFullDto eventFullDto);
+
     @Mapping(target = "eventDate", expression = "java(toLocalDateTime(event.getEventDate()))")
     EventShortDto toShortDto(Event event);
 

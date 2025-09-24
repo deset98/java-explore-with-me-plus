@@ -1,6 +1,5 @@
 package ru.practicum.ewm.event.service;
 
-import jakarta.validation.constraints.Positive;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
