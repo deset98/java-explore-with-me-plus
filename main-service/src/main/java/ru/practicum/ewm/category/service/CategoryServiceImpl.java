@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryParamDto;
-import ru.practicum.ewm.category.mapper.CategoryMapper;
+import ru.practicum.ewm.category.mapper.CategoryManualMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.exception.ConflictException;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final CategoryMapper categoryMapper;
+    private final CategoryManualMapper categoryMapper;
 
     @Override
     public CategoryDto addCategory(CategoryParamDto categoryParamDto) {
