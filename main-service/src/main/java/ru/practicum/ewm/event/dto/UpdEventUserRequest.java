@@ -2,8 +2,8 @@ package ru.practicum.ewm.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,39 +18,35 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UpdEventUserRequest {
 
-    @NotBlank
     @Size(min = 20, max = 2000)
     private String annotation;
 
-    @NotNull
-    private Long categoryId;
+    private Long category;
 
-    @NotBlank
     @Size(min = 20, max = 7000)
     private String description;
 
-    @NotNull
-//    @FutureAfterHours(hours = 2)
+    //    @FutureAfterHours(hours = 2)
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
-    @NotNull
     private Location location;
 
-    @NotNull
     private Boolean paid;
 
-    @NotNull
+    @Positive
     private Integer participantLimit;
 
-    @NotNull
     private Boolean requestModeration;
 
-    @NotNull
     private StateAction stateAction;
 
-    @NotBlank
     @Size(min = 3, max = 120)
     private String title;
+
+    public enum StateAction {
+        SEND_TO_REVIEW,
+        CANCEL_REVIEW
+    }
 }

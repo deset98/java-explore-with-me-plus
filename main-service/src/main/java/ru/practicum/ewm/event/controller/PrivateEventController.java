@@ -38,7 +38,6 @@ public class PrivateEventController {
         return ResponseEntity
                 .created(URI.create("/events/" + result.getId()))
                 .body(result);
-        // 400 и 409
     }
 
     @GetMapping
@@ -49,8 +48,6 @@ public class PrivateEventController {
 
         List<EventShortDto> result = eventService.findAll(userId, from, size);
         return ResponseEntity.ok(result);
-        // 400
-        // прикрутить модуль статистики
     }
 
     @GetMapping("/{eventId}")
@@ -60,19 +57,17 @@ public class PrivateEventController {
 
         EventFullDto result = eventService.findByIdAndInitiator_Id(userId, eventId);
         return ResponseEntity.ok(result);
-        // 400
-        // прикрутить модуль статистики
     }
 
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventFullDto> update(@PathVariable("userId") @NotNull @Positive Long userId,
                                                @PathVariable("eventId") @NotNull @Positive Long eventId,
                                                @RequestBody @Valid final UpdEventUserRequest updEventUserRequest) {
-        log.debug("PrivateEventController; метод update(); userId={}, eventId={}", userId, eventId);
+        log.debug("PrivateEventController; метод update(); userId={}, eventId={}, dto={}",
+                userId, eventId, updEventUserRequest);
 
-        EventFullDto result = eventService.update(userId, eventId, updEventUserRequest);
+        EventFullDto result = eventService.userUpdate(userId, eventId, updEventUserRequest);
         return ResponseEntity.ok(result);
-        // 400 и 409
     }
 
 //    @GetMapping("/{eventId}/requests")

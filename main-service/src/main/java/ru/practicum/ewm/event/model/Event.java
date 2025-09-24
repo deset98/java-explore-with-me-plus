@@ -40,7 +40,6 @@ public class Event {
 
     @Column(name = "created_on",
             nullable = false)
-//    columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     @Builder.Default
     private Instant createdOn = Instant.now();
 
@@ -62,26 +61,23 @@ public class Event {
     @Embedded
     private Location location;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "location_id",
-//            nullable = false,
-//            foreignKey = @ForeignKey(name = "fk_events_locations"))
-//    @ToString.Exclude
-//    private LocationENTITY locationENTITY;
-
-    @Column(nullable = false)
-    private Boolean paid;
+    @Column(nullable = false,
+            columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean paid = false;
 
     @Column(name = "participant_limit",
-            nullable = false)
-    private Integer participantLimit;
+            columnDefinition = "integer default 0")
+    @Builder.Default
+    private Integer participantLimit = 0;
 
     @Column(name = "published_on")
     private Instant publishedOn;
 
     @Column(name = "request_moderation",
-            nullable = false)
-    private Boolean requestModeration;
+            columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean requestModeration = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

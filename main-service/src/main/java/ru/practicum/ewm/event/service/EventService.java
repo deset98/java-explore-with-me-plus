@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.service;
 
+import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
@@ -14,5 +15,7 @@ public interface EventService {
 
     List<EventShortDto> findAll(Long userId, int from, int size);
 
-    EventFullDto update(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
+    EventFullDto userUpdate(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
+
+    EventFullDto adminUpdate(Long eventId, UpdEventAdminRequest updEventAdminRequest);
 }

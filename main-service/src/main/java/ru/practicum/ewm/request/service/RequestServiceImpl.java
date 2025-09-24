@@ -9,7 +9,7 @@ import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestMapper;
-import ru.practicum.ewm.request.model.ResponseRequestDto;
+import ru.practicum.ewm.request.model.ParticipationRequestDto;
 import ru.practicum.ewm.request.model.Status;
 import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.mapper.UserMapper;
@@ -28,10 +28,11 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final EventRepository eventRepository;
+    private final RequestMapper requestMapper;
 
 
     @Override
-    public ResponseRequestDto createRequest(Long userId, Long eventId) {
+    public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Event event = eventRepository.findById(eventId)
@@ -56,28 +57,28 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Достигнут лимит запросов на участие в событии");
         }
         if (!event.getRequestModeration()) {
-            Request result = requestRepository.save(RequestMapper.toEntity(user, event, Status.CONFIRMED));
-            return RequestMapper.toResponseEntity(result);
+            Request result = requestRepository.save(requestMapper.toEntity(user, event, Status.CONFIRMED));
+            return requestMapper.toResponseEntity(result);
         }
-        Request result = requestRepository.save(RequestMapper.toEntity(user, event, Status.PENDING));
-        return RequestMapper.toResponseEntity(result);
+        Request result = requestRepository.save(requestMapper.toEntity(user, event, Status.PENDING));
+        return requestMapper.toResponseEntity(result);
     }
 
     @Override
-    public List<ResponseRequestDto> getRequests(Long userId) {
+    public List<ParticipationRequestDto> getRequests(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         List<Request> result = requestRepository.findAllByRequester(user);
-        return result.stream().map(RequestMapper::toResponseEntity).collect(Collectors.toList());
+        return result.stream().map(requestMapper::toResponseEntity).collect(Collectors.toList());
     }
 
     @Override
-    public ResponseRequestDto cancelRequest(Long userId, Long requestId) {
+    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден"));
-        Request result = requestRepository.save(RequestMapper.toEntity(user, request.getEvent(), Status.REJECTED));
-        return RequestMapper.toResponseEntity(result);
+        Request result = requestRepository.save(requestMapper.toEntity(user, request.getEvent(), Status.REJECTED));
+        return requestMapper.toResponseEntity(result);
     }
 }

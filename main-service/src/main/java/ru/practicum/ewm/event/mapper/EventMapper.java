@@ -2,10 +2,7 @@ package ru.practicum.ewm.event.mapper;
 
 import org.mapstruct.*;
 import ru.practicum.ewm.category.mapper.CategoryManualMapper;
-import ru.practicum.ewm.event.dto.EventFullDto;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.event.dto.UpdEventUserRequest;
+import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.user.mapper.UserMapper;
 
@@ -17,36 +14,31 @@ import java.time.ZoneOffset;
         uses = {CategoryManualMapper.class, UserMapper.class})
 public interface EventMapper {
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate", expression = "java(toInstant(newEventDto.getEventDate()))")
+    @Mapping(target = "eventDate", expression = "java(toInstantForMap(newEventDto.getEventDate()))")
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "paid", expression = "java(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)")
+    @Mapping(target = "participantLimit",
+            expression = "java(newEventDto.getParticipantLimit() != null ? newEventDto.getParticipantLimit() : 0)")
+    @Mapping(target = "requestModeration",
+            expression = "java(newEventDto.getRequestModeration() != null ? newEventDto.getRequestModeration() : true)")
+
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "views", ignore = true)
     Event toEntity(NewEventDto newEventDto);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "confirmedRequests", ignore = true)
-    @Mapping(target = "createdOn", ignore = true)
-    @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate", expression = "java(toInstant(eventFullDto.getEventDate()))")
-    @Mapping(target = "initiator", ignore = true)
-    @Mapping(target = "publishedOn", ignore = true)
-    @Mapping(target = "state", ignore = true)
-    @Mapping(target = "views", ignore = true)
-    Event toEntity(EventFullDto eventFullDto);
-
-    @Mapping(target = "eventDate", expression = "java(toLocalDateTime(event.getEventDate()))")
+    @Mapping(target = "eventDate", expression = "java(toLocalDateTimeForMap(event.getEventDate()))")
     EventShortDto toShortDto(Event event);
 
-    @Mapping(target = "createdOn", expression = "java(toLocalDateTime(event.getCreatedOn()))")
-    @Mapping(target = "eventDate", expression = "java(toLocalDateTime(event.getEventDate()))")
-    @Mapping(target = "publishedOn", expression = "java(toLocalDateTime(event.getPublishedOn()))")
+    @Mapping(target = "createdOn", expression = "java(toLocalDateTimeForMap(event.getCreatedOn()))")
+    @Mapping(target = "eventDate", expression = "java(toLocalDateTimeForMap(event.getEventDate()))")
+    @Mapping(target = "publishedOn", expression = "java(toLocalDateTimeForMap(event.getPublishedOn()))")
     EventFullDto toFullDto(Event event);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -54,19 +46,39 @@ public interface EventMapper {
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "location", ignore = true)
-    @Mapping(target = "eventDate", expression = "java(toInstant(updEventUserRequest.getEventDate()))")
-    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "eventDate",
+            expression = "java(toInstantForUpdate(updEventUserRequest.getEventDate(), event.getEventDate()))")
     @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
     void updateFromDto(UpdEventUserRequest updEventUserRequest, @MappingTarget Event event);
 
-    default Instant toInstant(LocalDateTime dateTime) {
-        return dateTime.toInstant(ZoneOffset.UTC);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    @Mapping(target = "eventDate",
+            expression = "java(toInstantForUpdate(updEventAdminRequest.getEventDate(), event.getEventDate()))")
+    @Mapping(target = "publishedOn", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
+    void updateFromDto(UpdEventAdminRequest updEventAdminRequest, @MappingTarget Event event);
+
+    default Instant toInstantForMap(LocalDateTime dateTime) {
+        return dateTime != null ? dateTime.toInstant(ZoneOffset.UTC) : null;
     }
 
-    default LocalDateTime toLocalDateTime(Instant instant) {
+    default LocalDateTime toLocalDateTimeForMap(Instant instant) {
         return instant != null ? LocalDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
     }
+
+    default Instant toInstantForUpdate(LocalDateTime newDateTime, Instant currentValue) {
+        return newDateTime != null ? newDateTime.toInstant(ZoneOffset.UTC) : currentValue;
+    }
+
 }
