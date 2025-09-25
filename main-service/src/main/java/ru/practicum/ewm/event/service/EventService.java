@@ -5,6 +5,7 @@ import ru.practicum.ewm.event.dto.*;
 import java.util.List;
 
 public interface EventService {
+
     EventFullDto create(Long userId, NewEventDto newEventDto);
 
     List<EventShortDto> findAll(Long userId, int from, int size);
@@ -15,4 +16,9 @@ public interface EventService {
 
     EventFullDto adminUpdate(Long eventId, UpdEventAdminRequest updEventAdminRequest);
 
+    List<EventFullDto> adminSearch(AdminEventSearchParams params);
+
+    List<EventFullDto> publicSearchMany(UserEventSearchParams params);
+
+    EventFullDto publicSearchOne(Long eventId);
 }
