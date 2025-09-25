@@ -2,6 +2,9 @@ package ru.practicum.ewm.compilation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.compilation.model.CompilationMapper;
@@ -64,5 +67,25 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation result = compilationRepository.save(currentCompilation);
 
         return compilationMapper.toCompilationDto(result);
+    }
+
+    @Override
+    public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
+        Pageable page = PageRequest.of(from / size, size);
+
+        Page<Compilation> comps;
+        if (pinned != null) {
+            comps = compilationRepository.findAllByPinned(pinned, page);
+        } else {
+            comps = compilationRepository.findAll(page);
+        }
+        return comps.stream().map(compilationMapper::toCompilationDto).toList();
+    }
+
+    @Override
+    public CompilationDto getCompilationById(Long compId) {
+        Compilation compilation = compilationRepository.findById(compId)
+                .orElseThrow(() -> new NotFoundException("Подборка не найдена"));
+        return compilationMapper.toCompilationDto(compilation);
     }
 }
