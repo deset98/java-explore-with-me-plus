@@ -1,5 +1,8 @@
 package ru.practicum.ewm.event.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,6 +16,7 @@ import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.QEvent;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConditionNotMetException;
@@ -23,7 +27,10 @@ import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.time.ZoneOffset.UTC;
 
 @Slf4j
 @Service
@@ -36,6 +43,8 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
 
     private final EventMapper eventMapper;
+
+    private final EntityManager em;
 
     @Transactional
     @Override
@@ -71,7 +80,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto findByIdAndInitiator_Id(Long userId, Long eventId) {
         log.debug("В EventServiceImpl вызван метод для ПОЛУЧЕНИЯ event id={} от user id={}", eventId, userId);
 
-        Event event = eventRepository.findByIdAndInitiator_Id(userId, eventId)
+        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
         return eventMapper.toFullDto(event);
     }
@@ -153,6 +162,120 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
+    @Override
+    public List<EventFullDto> adminSearch(AdminEventSearchParams params) {
+        log.debug("Метод adminSearchEvents; {}", params);
+
+        QEvent event = QEvent.event;
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        if (params.getUsers() != null && !params.getUsers().isEmpty()) {
+            conditions.add(event.initiator.id.in(params.getUsers()));
+        }
+
+        if (params.getCategories() != null && !params.getCategories().isEmpty()) {
+            conditions.add(event.category.id.in(params.getCategories()));
+        }
+
+        if (params.getStates() != null && !params.getStates().isEmpty()) {
+            conditions.add(event.state.in(params.getStates()));
+        }
+
+        if (params.getRangeStart() != null) {
+            Instant rangeStart = params.getRangeStart().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.after(rangeStart));
+        }
+
+        if (params.getRangeEnd() != null) {
+            Instant rangeEnd = params.getRangeEnd().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.before(rangeEnd));
+        }
+
+        BooleanExpression finalCondition = conditions.stream()
+                .reduce(BooleanExpression::and)
+                .orElse(Expressions.TRUE);
+
+        log.debug("{}", finalCondition);
+
+        int page = params.getFrom() / params.getSize();
+        Pageable pageable = PageRequest.of(page, params.getSize());
+
+        Page<Event> events = eventRepository.findAll(finalCondition, pageable);
+
+        return events.map(eventMapper::toFullDto).getContent();
+    }
+
+    @Override
+    public List<EventFullDto> publicSearchMany(UserEventSearchParams params) {
+        log.debug("Метод publicSearchMany; {}", params);
+
+        QEvent event = QEvent.event;
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        conditions.add(event.state.eq(State.PUBLISHED));
+
+        if (params.getText() != null && !params.getText().isEmpty()) {
+            conditions.add(
+                    event.annotation.containsIgnoreCase(params.getText())
+                            .or(event.description.containsIgnoreCase(params.getText())));
+        }
+
+        if (params.getCategories() != null && !params.getCategories().isEmpty()) {
+            conditions.add(event.category.id.in(params.getCategories()));
+        }
+
+        if (params.getPaid() != null) {
+            conditions.add(event.paid.eq(params.getPaid()));
+        }
+
+        if (params.getRangeStart() != null) {
+            Instant rangeStart = params.getRangeStart().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.after(rangeStart));
+        }
+
+        if (params.getRangeEnd() != null) {
+            Instant rangeEnd = params.getRangeEnd().atZone(UTC).toInstant();
+            conditions.add(event.eventDate.before(rangeEnd));
+        }
+
+        if (params.getRangeStart() == null && params.getRangeEnd() == null) {
+            conditions.add(event.eventDate.after(Instant.now()));
+        }
+
+        if (params.getOnlyAvailable() != null) {
+            conditions.add(event.confirmedRequests.lt(event.participantLimit.longValue()));
+        }
+
+        BooleanExpression finalCondition = conditions.stream()
+                .reduce(BooleanExpression::and)
+                .orElse(Expressions.TRUE);
+
+        log.debug("{}", finalCondition);
+
+        int page = params.getFrom() / params.getSize();
+
+        Pageable pageable = null;
+
+            switch (params.getSort()) {
+                case EVENT_DATE -> pageable =
+                        PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.ASC, "eventDate"));
+                case VIEWS -> pageable =
+                        PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.DESC, "views"));
+            }
+
+        Page<Event> events = eventRepository.findAll(finalCondition, pageable);
+        return events.map(eventMapper::toFullDto).getContent();
+    }
+
+    @Override
+    public EventFullDto publicSearchOne(Long eventId) {
+
+        Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
+
+        return eventMapper.toFullDto(event);
+    }
+
     private User findUser(Long userId) {
         log.debug("Поиск User id={} в репозитории", userId);
 
@@ -193,7 +316,7 @@ public class EventServiceImpl implements EventService {
     private void checkEventDateForPublish(LocalDateTime eventDate) {
         log.debug("Проверка даты Event при ПУБЛИКАЦИИ");
 
-        if (eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ForbiddenException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
         }
     }
