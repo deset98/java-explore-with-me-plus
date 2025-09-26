@@ -1,10 +1,9 @@
 package ru.practicum.ewm.request.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ParticipationRequestDto {
     private Long id;
-    private EventShortDto event;
-    private User requester;
+    private Long event;
+    private Long requester;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created;
     private Status status;
 }
