@@ -74,11 +74,17 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден"));
-        Request result = requestRepository.save(requestMapper.toEntity(user, request.getEvent(), Status.REJECTED));
+        request.setStatus(Status.CANCELED);
+
+        if (!request.getRequester().getId().equals(userId)) {
+            throw new ConflictException("Пользователь не является автором этого запроса");
+        }
+
+        Request result = requestRepository.save(request);
         return requestMapper.toResponseEntity(result);
     }
 }
