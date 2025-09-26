@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.event.dto.AdminEventSearchParams;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.UpdEventAdminRequest;
 import ru.practicum.ewm.event.service.EventService;
+
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -23,8 +26,8 @@ public class AdminEventController {
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> adminUpdateEvent(@PathVariable @Positive Long eventId,
-                                                         @RequestBody @Valid UpdEventAdminRequest updDto) {
+    public ResponseEntity<EventFullDto> adminUpdate(@PathVariable @Positive Long eventId,
+                                                    @RequestBody @Valid UpdEventAdminRequest updDto) {
         log.debug("Контроллер AdminEventController; метод adminUpdateEvent(); eventId: {}, dto={}",
                 eventId, updDto);
 
@@ -32,4 +35,11 @@ public class AdminEventController {
         return ResponseEntity.ok(eventFullDto);
     }
 
+    @GetMapping
+    public ResponseEntity<List<EventFullDto>> adminSearch(@Valid @ModelAttribute AdminEventSearchParams params) {
+        log.debug("Контроллер AdminEventController; метод adminSearchEvents; {}", params);
+
+        List<EventFullDto> events = eventService.adminSearch(params);
+        return ResponseEntity.ok(events);
+    }
 }

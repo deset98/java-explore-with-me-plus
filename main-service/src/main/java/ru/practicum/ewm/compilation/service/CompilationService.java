@@ -3,6 +3,7 @@ package ru.practicum.ewm.compilation.service;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.compilation.model.NewCompilationDto;
 import ru.practicum.ewm.compilation.model.CompilationDto;
+import ru.practicum.ewm.compilation.model.UpdateCompilationRequest;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface CompilationService {
 
     void deleteCompilation(Long compId);
 
-    CompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto);
+    CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilationRequest);
 
     List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size);
 

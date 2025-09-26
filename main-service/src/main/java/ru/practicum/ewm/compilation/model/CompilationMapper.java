@@ -21,6 +21,14 @@ public class CompilationMapper {
                 .build();
     }
 
+    public Compilation toEntity(UpdateCompilationRequest updateCompilationRequest,  List<Event> events) {
+        return Compilation.builder()
+                .events(events)
+                .pinned(updateCompilationRequest.getPinned())
+                .title(updateCompilationRequest.getTitle())
+                .build();
+    }
+
     public CompilationDto toCompilationDto(Compilation compilation) {
         return CompilationDto.builder()
                 .id(compilation.getId())

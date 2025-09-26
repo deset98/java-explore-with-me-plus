@@ -6,10 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.compilation.model.Compilation;
-import ru.practicum.ewm.compilation.model.CompilationMapper;
-import ru.practicum.ewm.compilation.model.NewCompilationDto;
-import ru.practicum.ewm.compilation.model.CompilationDto;
+import ru.practicum.ewm.compilation.model.*;
 import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
@@ -49,20 +46,20 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto updateCompilation(Long compId, NewCompilationDto newCompilationDto) {
+    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation currentCompilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Подборка не найдена"));
-        List<Event> events = eventRepository.getEventsByIdIn(newCompilationDto.getEvents());
+        List<Event> events = eventRepository.getEventsByIdIn(updateCompilationRequest.getEvents());
 
-        if (newCompilationDto.getEvents().size() == 1 && newCompilationDto.getEvents().getFirst() == 0) {
+        if (updateCompilationRequest.getEvents().size() == 1 && updateCompilationRequest.getEvents().getFirst() == 0) {
             events = Collections.emptyList();
         } else {
-            if (events.size() != newCompilationDto.getEvents().size()) {
+            if (events.size() != updateCompilationRequest.getEvents().size()) {
                 throw new NotFoundException("Некоторые события не найдены");
             }
         }
 
-        Compilation updatedCompilation = compilationMapper.toEntity(newCompilationDto, events);
+        Compilation updatedCompilation = compilationMapper.toEntity(updateCompilationRequest, events);
         compilationMapper.updateFields(currentCompilation, updatedCompilation);
         Compilation result = compilationRepository.save(currentCompilation);
 

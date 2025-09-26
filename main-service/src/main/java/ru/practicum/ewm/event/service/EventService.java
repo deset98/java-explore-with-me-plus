@@ -18,4 +18,10 @@ public interface EventService {
     EventFullDto userUpdate(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
 
     EventFullDto adminUpdate(Long eventId, UpdEventAdminRequest updEventAdminRequest);
+
+    List<EventFullDto> adminSearch(AdminEventSearchParams params);
+
+    List<EventFullDto> publicSearchMany(UserEventSearchParams params);
+
+    EventFullDto publicSearchOne(Long eventId);
 }
