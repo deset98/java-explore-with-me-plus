@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.BadRequestException;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.dto.RequestValidDto;
@@ -40,6 +41,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto add(NewUserRequest userInputDto) {
         log.debug("Сервис UserServiceImpl; Метод add(); userInputDto={}", userInputDto);
+
+        if (userRepository.existsByEmail(userInputDto.getEmail())) {
+            throw new ConflictException("User с Email={} уже существует", userInputDto.getEmail());
+        }
 
         String localpart = userInputDto.getEmail().substring(0, userInputDto.getEmail().indexOf('@'));
         if (localpart.length() > 64) {

@@ -28,7 +28,8 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_events_categories"))
+            foreignKey = @ForeignKey(name = "fk_events_categories",
+                                     value = ConstraintMode.CONSTRAINT))
     @ToString.Exclude
     private Category category;
 
@@ -75,7 +76,7 @@ public class Event {
     private Instant publishedOn;
 
     @Column(name = "request_moderation",
-            columnDefinition = "boolean default false")
+            columnDefinition = "boolean default true")
     @Builder.Default
     private Boolean requestModeration = true;
 

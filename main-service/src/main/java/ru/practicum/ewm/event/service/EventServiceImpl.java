@@ -20,6 +20,7 @@ import ru.practicum.ewm.event.model.QEvent;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConditionNotMetException;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.model.User;
@@ -31,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
+import static ru.practicum.ewm.event.dto.UpdEventAdminRequest.StateAction.PUBLISH_EVENT;
+import static ru.practicum.ewm.event.model.State.PENDING;
+import static ru.practicum.ewm.event.model.State.PUBLISHED;
 
 @Slf4j
 @Service
@@ -96,10 +100,14 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
 
+        if (event.getState().equals(PUBLISHED)) {
+            throw new ConflictException("Event id={} нельзя изменить; его status={}", eventId, event.getState());
+        }
+
         log.debug("Найден Event в репозитории; event={}", event);
 
         if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
-            throw new ForbiddenException("Event id={} нельзя обновить пока оно опубликовано", event.getId());
+            throw new ConflictException("Event id={} нельзя обновить пока оно опубликовано", eventId);
         }
         if (updDto.getCategory() != null) {
             event.setCategory(this.findCategory(updDto.getCategory()));
@@ -126,6 +134,12 @@ public class EventServiceImpl implements EventService {
         log.debug("Сервис EventServiceImpl; метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
 
         Event event = this.findEvent(eventId);
+
+//        if (updDto.getStateAction() != null &&
+//                (updDto.getStateAction().equals(PUBLISH_EVENT) &&
+//                        (event.getState().equals(State.CANCELED) || event.getState().equals(PUBLISHED)))) {
+//        }
+
         eventMapper.updateFromDto(updDto, event);
 
         this.checkEventDateForPublish(updDto.getEventDate());
@@ -133,12 +147,14 @@ public class EventServiceImpl implements EventService {
         if (updDto.getStateAction() != null) {
             switch (updDto.getStateAction()) {
                 case PUBLISH_EVENT -> {
-                    if (event.getState().equals(State.PENDING)) {
-                        event.setState(State.PUBLISHED);
+                    if (event.getState().equals(PENDING)) {
+                        event.setState(PUBLISHED);
                         event.setPublishedOn(Instant.now());
-                    } else {
+                    } else if (event.getState().equals(State.CANCELED) || event.getState().equals(PUBLISHED)) {
+                        throw new ConflictException("Event id={} нельзя опубликовать; его status={}", eventId, event.getState());
+                    } /*else {
                         throw new ConditionNotMetException("Для публикации Event статус должен быть PENDING");
-                    }
+                    }*/
 
                     log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
                             event.getState(), event.getPublishedOn());
@@ -146,8 +162,8 @@ public class EventServiceImpl implements EventService {
                 case REJECT_EVENT -> {
                     if (event.getState().equals(State.PENDING)) {
                         event.setState(State.CANCELED);
-                    } else if (event.getState().equals(State.PUBLISHED)) {
-                        throw new ConditionNotMetException("Опубликованные Event не могут быть отклонены");
+                    } else if (event.getState().equals(PUBLISHED)) {
+                        throw new ConflictException("Опубликованные Event не могут быть отклонены");
                     }
 
                     log.debug("Для Event назначен статус={}", event.getState());
@@ -157,7 +173,7 @@ public class EventServiceImpl implements EventService {
 
         event = eventRepository.save(event);
 
-        log.debug("метод adminUpdate(); Event обновлен в репозитории event={}", event);
+        log.debug("Метод adminUpdate(); Event обновлен в репозитории event={}", event);
 
         return eventMapper.toFullDto(event);
     }
@@ -212,7 +228,7 @@ public class EventServiceImpl implements EventService {
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();
 
-        conditions.add(event.state.eq(State.PUBLISHED));
+        conditions.add(event.state.eq(PUBLISHED));
 
         if (params.getText() != null && !params.getText().isEmpty()) {
             conditions.add(
@@ -256,12 +272,12 @@ public class EventServiceImpl implements EventService {
 
         Pageable pageable = null;
 
-            switch (params.getSort()) {
-                case EVENT_DATE -> pageable =
-                        PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.ASC, "eventDate"));
-                case VIEWS -> pageable =
-                        PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.DESC, "views"));
-            }
+        switch (params.getSort()) {
+            case EVENT_DATE -> pageable =
+                    PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.ASC, "eventDate"));
+            case VIEWS -> pageable =
+                    PageRequest.of(page, params.getSize(), Sort.by(Sort.Direction.DESC, "views"));
+        }
 
         Page<Event> events = eventRepository.findAll(finalCondition, pageable);
         return events.map(eventMapper::toFullDto).getContent();
@@ -270,8 +286,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto publicSearchOne(Long eventId) {
 
-        Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
+        Event event = eventRepository.findByIdAndState(eventId, PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
+        event.setViews(event.getViews() + 1);
+        event = eventRepository.save(event);
 
         return eventMapper.toFullDto(event);
     }
