@@ -31,7 +31,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflictException(ConflictException ex) {
         log.warn("Error", ex);
-        return new ErrorResponse("Object not found", ex.getMessage());
+        return new ErrorResponse("Conflict", ex.getMessage());
     }
 
     private record ErrorResponse(String error, String description){}

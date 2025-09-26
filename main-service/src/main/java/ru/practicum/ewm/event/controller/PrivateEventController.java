@@ -55,7 +55,7 @@ public class PrivateEventController {
                                              @PathVariable("eventId") @NotNull @Positive Long eventId) {
         log.debug("PrivateEventController; метод find(); userId={}, eventId={}", userId, eventId);
 
-        EventFullDto result = eventService.findOne(userId, eventId);
+        EventFullDto result = eventService.findByIdAndInitiator_Id(userId, eventId);
         return ResponseEntity.ok(result);
     }
 

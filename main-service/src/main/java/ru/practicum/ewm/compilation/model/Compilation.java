@@ -22,10 +22,10 @@ public class Compilation {
 
     @ManyToMany
     @JoinTable(name = "compilation_events",
-               joinColumns = @JoinColumn(name = "compilation_id",
-                                         foreignKey = @ForeignKey(name = "fk_compilation_events__compilations")),
-               inverseJoinColumns = @JoinColumn(name = "event_id",
-                                                foreignKey = @ForeignKey(name = "fk_compilation_events__events"))
+            joinColumns = @JoinColumn(name = "compilation_id",
+                    foreignKey = @ForeignKey(name = "fk_compilation_events__compilations")),
+            inverseJoinColumns = @JoinColumn(name = "event_id",
+                    foreignKey = @ForeignKey(name = "fk_compilation_events__events"))
     )
     private List<Event> events;
 

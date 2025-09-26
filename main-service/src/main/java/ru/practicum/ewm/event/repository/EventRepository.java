@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,4 +22,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
     Optional<Event> findByIdAndState(Long eventId, State state);
 
 
+    List<Event> getEventsByIdIn(Collection<Long> ids);
+
+    Optional<Event> findById(Long eventId);
 }

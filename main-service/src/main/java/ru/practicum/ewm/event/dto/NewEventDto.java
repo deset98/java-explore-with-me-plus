@@ -19,7 +19,6 @@ public class NewEventDto {
     @Size(min = 20, max = 2000)
     private String annotation;
 
-//    @NotNull
     private Long category;
 
     @NotBlank
@@ -27,7 +26,6 @@ public class NewEventDto {
     private String description;
 
     @NotNull
-//    @FutureAfterHours(hours = 2)
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
@@ -37,7 +35,7 @@ public class NewEventDto {
 
     private Boolean paid;
 
-    @Positive
+    @PositiveOrZero
     private Integer participantLimit;
 
     private Boolean requestModeration;

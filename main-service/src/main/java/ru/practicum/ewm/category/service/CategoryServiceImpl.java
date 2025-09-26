@@ -2,6 +2,7 @@ package ru.practicum.ewm.category.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryParamDto;
@@ -24,8 +25,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto addCategory(CategoryParamDto categoryParamDto) {
-        if (categoryRepository.existsByName(categoryParamDto.getName())) {
-            throw new ConflictException("Категория с именем " + categoryParamDto.getName() + " уже существует");
+
+        if (categoryRepository.existsByNameIgnoreCase(categoryParamDto.getName())) {
+            throw new ConflictException("Категория с именем {} уже существует", categoryParamDto.getName());
         }
 
         Category category = new Category();
@@ -39,13 +41,25 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(catId)) {
             throw new NotFoundException("Категория с id=" + catId + " не найдена");
         }
-        categoryRepository.deleteById(catId);
+
+        try {
+            categoryRepository.deleteById(catId);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Нельзя удалить категорию с привязанными событиями");
+        }
     }
 
     @Override
     public CategoryDto updateCategory(Long catId, CategoryParamDto categoryParamDto) {
+
+
+
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + catId + " не найдена"));
+
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(categoryParamDto.getName(), catId) ) {
+            throw new ConflictException("Категория с именем {} уже существует", categoryParamDto.getName());
+        }
 
         category.setName(categoryParamDto.getName());
         category = categoryRepository.save(category);
@@ -65,5 +79,9 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + catId + " не найдена"));
         return categoryMapper.toCategoryDto(category);
+    }
+
+    private void checkUniqueName(String name) {
+
     }
 }

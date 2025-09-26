@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.BadRequestException;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.dto.RequestValidDto;
@@ -15,8 +16,8 @@ import ru.practicum.ewm.user.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -32,8 +33,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto findById(Long id) {
+        User result = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        return userMapper.toResponseDto(result);
+    }
+
+    @Override
     public UserDto add(NewUserRequest userInputDto) {
         log.debug("Сервис UserServiceImpl; Метод add(); userInputDto={}", userInputDto);
+
+        if (userRepository.existsByEmail(userInputDto.getEmail())) {
+            throw new ConflictException("User с Email={} уже существует", userInputDto.getEmail());
+        }
 
         String localpart = userInputDto.getEmail().substring(0, userInputDto.getEmail().indexOf('@'));
         if (localpart.length() > 64) {
@@ -51,7 +62,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Сервис UserServiceImpl; Метод delete(); userId={}", userId);
 
 
-        if(userRepository.existsById(userId)) {
+        if (userRepository.existsById(userId)) {
             userRepository.deleteById(userId);
         } else {
             throw new NotFoundException("User userId=" + userId + " not found");
