@@ -32,7 +32,8 @@ public class Request {
     private User requester;
 
     @Column
-    private LocalDateTime created;
+    @Builder.Default
+    private LocalDateTime created = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     private Status status;

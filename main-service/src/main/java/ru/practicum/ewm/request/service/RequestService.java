@@ -1,14 +1,14 @@
 package ru.practicum.ewm.request.service;
 
-import ru.practicum.ewm.request.model.ParticipationRequestDto;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
 import java.util.List;
 
 public interface RequestService {
 
-    ParticipationRequestDto createRequest(Long userId, Long eventId);
+    ParticipationRequestDto create(Long userId, Long eventId);
 
-    List<ParticipationRequestDto> getRequests(Long userId);
+    List<ParticipationRequestDto> getAllBy(Long userId);
 
-    ParticipationRequestDto cancelRequest(Long  userId, Long requestId);
+    ParticipationRequestDto cancel(Long userId, Long requestId);
 }

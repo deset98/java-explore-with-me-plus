@@ -8,9 +8,9 @@ import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
+import ru.practicum.ewm.request.mapper.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
-import ru.practicum.ewm.request.model.RequestMapper;
-import ru.practicum.ewm.request.model.ParticipationRequestDto;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 import ru.practicum.ewm.request.model.Status;
 import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.mapper.UserMapper;
@@ -26,21 +26,20 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
-    private final RequestRepository requestRepository;
+
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
     private final EventRepository eventRepository;
+    private final RequestRepository requestRepository;
+
+    private final UserMapper userMapper;
     private final RequestMapper requestMapper;
 
-
     @Override
-    public ParticipationRequestDto createRequest(Long userId, Long eventId) {
+    public ParticipationRequestDto create(Long userId, Long eventId) {
         log.debug("Метод createRequest(); userId={}, eventId={}", userId, eventId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Ивент не найден"));
+        User user = this.findUserBy(userId);
+        Event event = this.findEventBy(eventId);
 
         if (event.getInitiator().equals(user)) {
             throw new ConflictException("Нельзя участвовать в собственном событии");
@@ -53,7 +52,7 @@ public class RequestServiceImpl implements RequestService {
                 .anyMatch(r -> r.getRequester().getId().equals(userId));
 
         if  (requestExists) {
-            throw new ConflictException("Запрос уже создан ранее");
+            throw new ConflictException("Request уже создан ранее");
         }
         if (initiatorEvent.isPresent()) {
             if (Objects.equals(initiatorEvent.get().getInitiator().getId(), userMapper.toUserShortDto(user).getId())) {
@@ -67,35 +66,57 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Достигнут лимит запросов на участие в событии");
         }
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            Request request = requestMapper.toEntity(user, event, Status.CONFIRMED);
+            Request request = Request.builder().requester(user).event(event).status(Status.CONFIRMED).build();
             request = requestRepository.save(request);
-            return requestMapper.toResponseEntity(request);
+
+            return requestMapper.toDto(request);
         }
-        Request result = requestRepository.save(requestMapper.toEntity(user, event, Status.PENDING));
-        return requestMapper.toResponseEntity(result);
+
+        Request request = Request.builder().requester(user).event(event).status(Status.PENDING).build();
+        request = requestRepository.save(request);
+
+        return requestMapper.toDto(request);
     }
 
     @Override
-    public List<ParticipationRequestDto> getRequests(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        List<Request> result = requestRepository.findAllByRequester(user);
-        return result.stream().map(requestMapper::toResponseEntity).collect(Collectors.toList());
+    public List<ParticipationRequestDto> getAllBy(Long userId) {
+        log.debug("Метод getAllBy(); userId={}", userId);
+
+        List<Request> result = requestRepository.findAllByRequesterId(userId);
+
+        return result.stream()
+                .map(requestMapper::toDto)
+                .toList();
     }
 
     @Override
-    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Запрос не найден"));
+    public ParticipationRequestDto cancel(Long userId, Long requestId) {
+        log.debug("Метод cancel(); userId={}, requestId={}", userId, requestId);
+
+        this.findUserBy(userId);
+        Request request = this.findRequestBy(requestId);
         request.setStatus(Status.CANCELED);
 
         if (!request.getRequester().getId().equals(userId)) {
-            throw new ConflictException("Пользователь не является автором этого запроса");
+            throw new ConflictException("User id={} не является автором этого запроса", userId);
         }
+        request = requestRepository.save(request);
 
-        Request result = requestRepository.save(request);
-        return requestMapper.toResponseEntity(result);
+        return requestMapper.toDto(request);
+    }
+
+
+    private User findUserBy(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User id={} не найден", userId));
+    }
+
+    private Request findRequestBy(Long requestId) {
+        return requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Request id={} не найден", requestId));
+    }
+
+    private Event findEventBy(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event id={} не найден", eventId));
     }
 }

@@ -47,7 +47,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         log.info(compilation.getEvents().toString());
 
-        return compilationMapper.toCompilationDto(compilation);
+        return compilationMapper.toDto(compilation);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class CompilationServiceImpl implements CompilationService {
         compilationMapper.updateFields(currentCompilation, updatedCompilation);
         Compilation result = compilationRepository.save(currentCompilation);
 
-        return compilationMapper.toCompilationDto(result);
+        return compilationMapper.toDto(result);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         return comps.stream()
-                .map(compilationMapper::toCompilationDto)
+                .map(compilationMapper::toDto)
                 .toList();
     }
 
@@ -105,7 +105,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = this.findCompilationBy(compId);
 
-        return compilationMapper.toCompilationDto(compilation);
+        return compilationMapper.toDto(compilation);
     }
 
 
