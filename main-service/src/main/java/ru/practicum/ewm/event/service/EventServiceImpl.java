@@ -19,7 +19,6 @@ import ru.practicum.ewm.event.model.QEvent;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
-import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
@@ -314,7 +313,7 @@ public class EventServiceImpl implements EventService {
         log.debug("Проверка даты при СОЗДАНИИ");
 
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ForbiddenException("Дата Event при СОЗДАНИИ должна быть в будущем, мин. через 2 часа");
+            throw new ConflictException("Дата Event при СОЗДАНИИ должна быть в будущем, мин. через 2 часа");
         }
     }
 
@@ -330,7 +329,7 @@ public class EventServiceImpl implements EventService {
         log.debug("Проверка даты Event при ПУБЛИКАЦИИ");
 
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
-            throw new ForbiddenException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
+            throw new ConflictException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
         }
     }
 }
