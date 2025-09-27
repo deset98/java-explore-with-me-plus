@@ -12,12 +12,15 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestValidDto {
+
     @NotNull
-    List<Long> ids;
+    private List<Long> ids;
+
     @NotNull
     @Positive
-    Integer from;
+    private Integer from;
+
     @NotNull
     @Positive
-    Integer size;
+    private Integer size;
 }

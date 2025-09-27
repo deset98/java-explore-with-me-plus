@@ -6,11 +6,12 @@ import ru.practicum.ewm.user.dto.UserDto;
 import java.util.List;
 
 public interface UserService {
-    List<UserDto> findAll(List<Long> ids, Integer from, Integer size);
 
-    UserDto findById(Long id);
+    List<UserDto> findAllBy(List<Long> ids, Integer from, Integer size);
 
-    UserDto add(NewUserRequest userInputDto);
+    UserDto findBy(Long userId);
+
+    UserDto add(NewUserRequest newDto);
 
     void delete(Long userId);
 }

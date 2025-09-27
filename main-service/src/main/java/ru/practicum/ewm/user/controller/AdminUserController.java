@@ -15,7 +15,6 @@ import ru.practicum.ewm.user.service.UserService;
 
 import java.util.List;
 
-
 @RestController
 @Slf4j
 @Validated
@@ -27,24 +26,23 @@ public class AdminUserController {
 
     @GetMapping
     public List<UserDto> findAll(@RequestParam(required = false) List<Long> ids,
-                                 @RequestParam(defaultValue = "0",
-                                                       required = false) @PositiveOrZero Integer from,
+                                 @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
                                  @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
-        log.debug("Контроллер AdminUserController; Метод findAll(); ids={}, from={}, size={}", ids, from, size);
+        log.debug("Метод findAll(); ids={}, from={}, size={}", ids, from, size);
 
-        return userService.findAll(ids, from, size);
+        return userService.findAllBy(ids, from, size);
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> add(@RequestBody @Valid NewUserRequest dto) {
-        log.debug("Контроллер AdminUserController; Метод add(); dto={}", dto);
+    public ResponseEntity<UserDto> add(@RequestBody @Valid NewUserRequest newDto) {
+        log.debug("Метод add(); newDto={}", newDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.add(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.add(newDto));
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> delete(@PathVariable @Positive Long userId) {
-        log.debug("Контроллер AdminUserController; Метод delete(); userId={}", userId);
+        log.debug("Метод delete(); userId={}", userId);
 
         userService.delete(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

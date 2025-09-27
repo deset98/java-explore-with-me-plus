@@ -70,7 +70,7 @@ public class EventServiceImpl implements EventService {
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
-        Page<Event> events = eventRepository.findAllByInitiator_Id(userId, pageable);
+        Page<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
 
         return events.map(eventMapper::toShortDto).getContent();
     }
@@ -79,7 +79,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getByUser(Long userId, Long eventId) {
         log.debug("Метод getByUser(); eventId={}, userId={}", eventId, userId);
 
-        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
 
         return eventMapper.toFullDto(event);
@@ -93,7 +93,7 @@ public class EventServiceImpl implements EventService {
 
         this.checkEventDateForUpdate(updDto);
 
-        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
 
         if (event.getState().equals(PUBLISHED)) {

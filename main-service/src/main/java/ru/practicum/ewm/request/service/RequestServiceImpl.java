@@ -3,6 +3,7 @@ package ru.practicum.ewm.request.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
@@ -20,11 +21,11 @@ import ru.practicum.ewm.user.repository.UserRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
 
     private final UserRepository userRepository;
@@ -35,6 +36,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper requestMapper;
 
     @Override
+    @Transactional
     public ParticipationRequestDto create(Long userId, Long eventId) {
         log.debug("Метод createRequest(); userId={}, eventId={}", userId, eventId);
 
@@ -46,7 +48,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         List<Request> requests = requestRepository.findAllByEventId(eventId);
-        Optional<Event> initiatorEvent = eventRepository.findByIdAndInitiator_Id(userId, eventId);
+        Optional<Event> initiatorEvent = eventRepository.findByIdAndInitiatorId(userId, eventId);
 
         boolean requestExists = requests.stream()
                 .anyMatch(r -> r.getRequester().getId().equals(userId));
@@ -55,7 +57,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Request уже создан ранее");
         }
         if (initiatorEvent.isPresent()) {
-            if (Objects.equals(initiatorEvent.get().getInitiator().getId(), userMapper.toUserShortDto(user).getId())) {
+            if (Objects.equals(initiatorEvent.get().getInitiator().getId(), userMapper.toShortDto(user).getId())) {
                 throw new ConflictException("Инициатор события не может добавить запрос на участие в своём событии");
             }
         }
@@ -90,6 +92,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
         log.debug("Метод cancel(); userId={}, requestId={}", userId, requestId);
 

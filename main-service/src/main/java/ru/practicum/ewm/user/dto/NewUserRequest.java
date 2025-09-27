@@ -12,12 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewUserRequest {
+
     @NotBlank
     @Email
     @Pattern(regexp = ".*[^\\s].*")
     @Size(min = 6, max = 254)
-    String email;
+    private String email;
+
     @NotBlank
     @Size(min = 2, max = 250)
-    String name;
+    private String name;
 }

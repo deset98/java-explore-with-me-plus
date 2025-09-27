@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.compilation.dto.UpdateCompilationRequest;
@@ -22,6 +23,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CompilationServiceImpl implements CompilationService {
 
     private final EventRepository eventRepository;
@@ -31,6 +33,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     // Admin API:
     @Override
+    @Transactional
     public CompilationDto create(NewCompilationDto newDto) {
         log.debug("Метод create(); newDto={}", newDto);
 
@@ -51,6 +54,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto update(Long compId, UpdateCompilationRequest updDto) {
         log.debug("Метод update(); compId={}, updDto={}", compId, updDto);
 
@@ -74,6 +78,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void delete(Long compId) {
         log.debug("Метод delete(); compId={}", compId);
 
