@@ -25,8 +25,7 @@ public class Compilation {
             joinColumns = @JoinColumn(name = "compilation_id",
                     foreignKey = @ForeignKey(name = "fk_compilation_events__compilations")),
             inverseJoinColumns = @JoinColumn(name = "event_id",
-                    foreignKey = @ForeignKey(name = "fk_compilation_events__events"))
-    )
+                    foreignKey = @ForeignKey(name = "fk_compilation_events__events")))
     private List<Event> events;
 
     @Column(nullable = false)

@@ -28,8 +28,7 @@ public class AdminEventController {
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventFullDto> adminUpdate(@PathVariable @Positive Long eventId,
                                                     @RequestBody @Valid UpdEventAdminRequest updDto) {
-        log.debug("Метод adminUpdateEvent(); eventId: {}, dto={}",
-                eventId, updDto);
+        log.debug("Метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
 
         EventFullDto eventFullDto = eventService.adminUpdate(eventId, updDto);
         return ResponseEntity.ok(eventFullDto);

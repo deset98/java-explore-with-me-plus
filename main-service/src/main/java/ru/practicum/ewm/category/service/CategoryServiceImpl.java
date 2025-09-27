@@ -20,22 +20,50 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final CategoryRepository categoryRepository;
 
+    // Admin API:
     @Override
-    public CategoryDto add(CategoryRequestDto dto) {
-        log.debug("Метод add(); categoryRequestDto: {}", dto);
+    public CategoryDto add(CategoryRequestDto newDto) {
+        log.debug("Метод add(); categoryRequestDto: {}", newDto);
 
-        this.validateCategoryNameExists(dto.getName());
+        this.validateCategoryNameExists(newDto.getName());
 
-        Category category = categoryMapper.toEntity(dto);
-        category.setName(dto.getName());
+        Category category = categoryMapper.toEntity(newDto);
+        category.setName(newDto.getName());
         category = categoryRepository.save(category);
 
         return categoryMapper.toDto(category);
     }
 
+    @Override
+    public void delete(Long categoryId) {
+        log.debug("Метод delete(); categoryId: {}", categoryId);
+
+        this.validateCategoryExists(categoryId);
+
+        try {
+            categoryRepository.deleteById(categoryId);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Нельзя удалить Category id={}, с ней связаны Event", categoryId);
+        }
+    }
+
+    @Override
+    public CategoryDto update(Long categoryId, CategoryRequestDto updDto) {
+        log.debug("Метод update(); categoryId: {}, dto: {}", categoryId, updDto);
+
+        this.validateCategoryNameExists(updDto.getName(), categoryId);
+
+        Category category = this.findCategoryById(categoryId);
+        category.setName(updDto.getName());
+        category = categoryRepository.save(category);
+
+        return categoryMapper.toDto(category);
+    }
+
+    // Public API:
     @Override
     public CategoryDto getById(Long categoryId) {
         log.debug("Метод getById(); categoryId: {}", categoryId);
@@ -54,32 +82,6 @@ public class CategoryServiceImpl implements CategoryService {
         return categories.stream()
                 .map(categoryMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public void delete(Long categoryId) {
-        log.debug("Метод delete(); categoryId: {}", categoryId);
-
-        this.validateCategoryExists(categoryId);
-
-        try {
-            categoryRepository.deleteById(categoryId);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Нельзя удалить Category id={}, с ней связаны Event", categoryId);
-        }
-    }
-
-    @Override
-    public CategoryDto update(Long categoryId, CategoryRequestDto dto) {
-        log.debug("Метод update(); categoryId: {}, dto: {}", categoryId, dto);
-
-        this.validateCategoryNameExists(dto.getName(), categoryId);
-
-        Category category = this.findCategoryById(categoryId);
-        category.setName(dto.getName());
-        category = categoryRepository.save(category);
-
-        return categoryMapper.toDto(category);
     }
 
 
@@ -103,6 +105,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private Category findCategoryById(Long categoryId) {
        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Категория с id=" + categoryId + " не найдена"));
+                .orElseThrow(() -> new NotFoundException("Category id={} не найдена", categoryId));
     }
 }

@@ -31,10 +31,10 @@ public class PrivateEventController {
 
     @PostMapping
     public ResponseEntity<EventFullDto> create(@PathVariable("userId") @NotNull @Positive Long userId,
-                                               @RequestBody @Valid final NewEventDto newEventDto) {
-        log.debug("PrivateEventController; метод create(); userId = {}; newEventDto = {}", userId, newEventDto);
+                                               @RequestBody @Valid final NewEventDto newDto) {
+        log.debug("Метод create(); userId = {}; newDto = {}", userId, newDto);
 
-        EventFullDto result = eventService.create(userId, newEventDto);
+        EventFullDto result = eventService.create(userId, newDto);
         return ResponseEntity
                 .created(URI.create("/events/" + result.getId()))
                 .body(result);

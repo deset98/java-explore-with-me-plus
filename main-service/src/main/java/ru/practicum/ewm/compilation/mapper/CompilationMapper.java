@@ -1,7 +1,11 @@
-package ru.practicum.ewm.compilation.model;
+package ru.practicum.ewm.compilation.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.practicum.ewm.compilation.dto.CompilationDto;
+import ru.practicum.ewm.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 
@@ -13,19 +17,19 @@ public class CompilationMapper {
 
     private final EventMapper eventMapper;
 
-    public Compilation toEntity(NewCompilationDto dto, List<Event> events) {
+    public Compilation toEntity(NewCompilationDto newDto, List<Event> events) {
         return Compilation.builder()
                 .events(events)
-                .pinned(dto.getPinned())
-                .title(dto.getTitle())
+                .pinned(newDto.getPinned())
+                .title(newDto.getTitle())
                 .build();
     }
 
-    public Compilation toEntity(UpdateCompilationRequest updateCompilationRequest,  List<Event> events) {
+    public Compilation toEntity(UpdateCompilationRequest updDto, List<Event> events) {
         return Compilation.builder()
                 .events(events)
-                .pinned(updateCompilationRequest.getPinned())
-                .title(updateCompilationRequest.getTitle())
+                .pinned(updDto.getPinned())
+                .title(updDto.getTitle())
                 .build();
     }
 

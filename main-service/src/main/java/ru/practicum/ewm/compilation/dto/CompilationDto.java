@@ -1,4 +1,4 @@
-package ru.practicum.ewm.compilation.model;
+package ru.practicum.ewm.compilation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompilationDto {
+
     private Long id;
+
     private List<EventShortDto> events;
+
     private Boolean pinned;
+
     private String title;
 }

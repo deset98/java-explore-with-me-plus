@@ -21,6 +21,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             nativeQuery = true)
     List<Category> findCategoriesByOffsetAndLimit(int from, int size);
 
+
     boolean existsByNameIgnoreCase(String name);
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long catId);

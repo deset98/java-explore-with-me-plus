@@ -8,7 +8,6 @@ import ru.practicum.ewm.category.model.Category;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
-//    @Mapping(target = "id", ignore = true)
     CategoryDto toDto(Category category);
 
     Category toEntity(CategoryDto dto);

@@ -1,4 +1,4 @@
-package ru.practicum.ewm.compilation.model;
+package ru.practicum.ewm.compilation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,9 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewCompilationDto {
+
     private List<Long> events = new ArrayList<>();
+
     @NotNull
     private Boolean pinned = false;
+
     @NotBlank
     @Length(max = 50)
     private String title;

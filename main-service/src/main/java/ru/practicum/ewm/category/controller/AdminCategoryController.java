@@ -21,10 +21,10 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CategoryDto> addCategory(@Valid @RequestBody CategoryRequestDto categoryRequestDto) {
-        log.debug("Метод addCategory(); categoryParamDto={}", categoryRequestDto);
+    public ResponseEntity<CategoryDto> addCategory(@Valid @RequestBody CategoryRequestDto newDto) {
+        log.debug("Метод addCategory(); categoryParamDto={}", newDto);
 
-        CategoryDto result = categoryService.add(categoryRequestDto);
+        CategoryDto result = categoryService.add(newDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
@@ -38,10 +38,10 @@ public class AdminCategoryController {
 
     @PatchMapping("/{catId}")
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long catId,
-                                                      @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
-        log.debug("Метод updateCategory(); categoryParamDto={}", categoryRequestDto);
+                                                      @Valid @RequestBody CategoryRequestDto updDto) {
+        log.debug("Метод updateCategory(); categoryParamDto={}", updDto);
 
-        CategoryDto result = categoryService.update(catId, categoryRequestDto);
+        CategoryDto result = categoryService.update(catId, updDto);
         return ResponseEntity.ok(result);
     }
 }

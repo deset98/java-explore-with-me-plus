@@ -7,13 +7,15 @@ import java.util.List;
 
 public interface CategoryService {
 
-    CategoryDto add(CategoryRequestDto categoryRequestDto);
+    // Admin API:
+    CategoryDto add(CategoryRequestDto newDto);
 
+    CategoryDto update(Long catId, CategoryRequestDto updDto);
+
+    void delete(Long categoryId);
+
+    // Public API:
     CategoryDto getById(Long categoryId);
 
     List<CategoryDto> getAll(int from, int size);
-
-    CategoryDto update(Long catId, CategoryRequestDto categoryRequestDto);
-
-    void delete(Long categoryId);
 }
