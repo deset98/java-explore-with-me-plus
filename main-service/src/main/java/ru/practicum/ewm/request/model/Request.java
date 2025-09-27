@@ -5,7 +5,7 @@ import lombok.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.user.model.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "requests")
@@ -33,7 +33,7 @@ public class Request {
 
     @Column
     @Builder.Default
-    private LocalDateTime created = LocalDateTime.now();
+    private Instant created = Instant.now();
 
     @Enumerated(EnumType.STRING)
     private Status status;
