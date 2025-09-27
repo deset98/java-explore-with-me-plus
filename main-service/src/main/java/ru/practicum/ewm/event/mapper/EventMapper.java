@@ -1,7 +1,7 @@
 package ru.practicum.ewm.event.mapper;
 
 import org.mapstruct.*;
-import ru.practicum.ewm.category.mapper.CategoryManualMapper;
+import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.user.mapper.UserMapper;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Mapper(componentModel = "spring",
-        uses = {CategoryManualMapper.class, UserMapper.class})
+        uses = {CategoryMapper.class, UserMapper.class})
 public interface EventMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

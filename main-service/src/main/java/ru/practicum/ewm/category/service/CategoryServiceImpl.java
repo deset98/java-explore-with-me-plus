@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.category.dto.CategoryParamDto;
-import ru.practicum.ewm.category.mapper.CategoryManualMapper;
+import ru.practicum.ewm.category.dto.CategoryRequestDto;
+import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.exception.ConflictException;
@@ -15,73 +15,94 @@ import ru.practicum.ewm.exception.NotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final CategoryManualMapper categoryMapper;
+    private final CategoryMapper categoryMapper;
 
     @Override
-    public CategoryDto addCategory(CategoryParamDto categoryParamDto) {
+    public CategoryDto add(CategoryRequestDto dto) {
+        log.debug("Метод add(); categoryRequestDto: {}", dto);
 
-        if (categoryRepository.existsByNameIgnoreCase(categoryParamDto.getName())) {
-            throw new ConflictException("Категория с именем {} уже существует", categoryParamDto.getName());
-        }
+        this.validateCategoryNameExists(dto.getName());
 
-        Category category = new Category();
-        category.setName(categoryParamDto.getName());
+        Category category = categoryMapper.toEntity(dto);
+        category.setName(dto.getName());
         category = categoryRepository.save(category);
-        return categoryMapper.toCategoryDto(category);
+
+        return categoryMapper.toDto(category);
     }
 
     @Override
-    public void deleteCategory(Long catId) {
-        if (!categoryRepository.existsById(catId)) {
-            throw new NotFoundException("Категория с id=" + catId + " не найдена");
-        }
+    public CategoryDto getById(Long categoryId) {
+        log.debug("Метод getById(); categoryId: {}", categoryId);
 
-        try {
-            categoryRepository.deleteById(catId);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Нельзя удалить категорию с привязанными событиями");
-        }
+        Category category = this.findCategoryById(categoryId);
+
+        return categoryMapper.toDto(category);
     }
 
     @Override
-    public CategoryDto updateCategory(Long catId, CategoryParamDto categoryParamDto) {
+    public List<CategoryDto> getAll(int from, int size) {
+        log.debug("Метод getAll(); from: {}, size: {}", from, size);
 
-
-
-        Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("Категория с id=" + catId + " не найдена"));
-
-        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(categoryParamDto.getName(), catId) ) {
-            throw new ConflictException("Категория с именем {} уже существует", categoryParamDto.getName());
-        }
-
-        category.setName(categoryParamDto.getName());
-        category = categoryRepository.save(category);
-        return categoryMapper.toCategoryDto(category);
-    }
-
-    @Override
-    public List<CategoryDto> getCategories(int from, int size) {
         List<Category> categories = categoryRepository.findCategoriesByOffsetAndLimit(from, size);
+
         return categories.stream()
-                .map(categoryMapper::toCategoryDto)
+                .map(categoryMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public CategoryDto getCategory(Long catId) {
-        Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("Категория с id=" + catId + " не найдена"));
-        return categoryMapper.toCategoryDto(category);
+    public void delete(Long categoryId) {
+        log.debug("Метод delete(); categoryId: {}", categoryId);
+
+        this.validateCategoryExists(categoryId);
+
+        try {
+            categoryRepository.deleteById(categoryId);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Нельзя удалить Category id={}, с ней связаны Event", categoryId);
+        }
     }
 
-    private void checkUniqueName(String name) {
+    @Override
+    public CategoryDto update(Long categoryId, CategoryRequestDto dto) {
+        log.debug("Метод update(); categoryId: {}, dto: {}", categoryId, dto);
 
+        this.validateCategoryNameExists(dto.getName(), categoryId);
+
+        Category category = this.findCategoryById(categoryId);
+        category.setName(dto.getName());
+        category = categoryRepository.save(category);
+
+        return categoryMapper.toDto(category);
+    }
+
+
+    private void validateCategoryNameExists(String name) {
+        if (categoryRepository.existsByNameIgnoreCase(name)) {
+            throw new ConflictException("Category name={} уже существует", name);
+        }
+    }
+
+    private void validateCategoryNameExists(String name, Long categoryId) {
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, categoryId)) {
+            throw new ConflictException("Category name={} уже существует", name, categoryId);
+        }
+    }
+
+    private void validateCategoryExists(Long categoryId) {
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new NotFoundException("Category id={} не найдена", categoryId);
+        }
+    }
+
+    private Category findCategoryById(Long categoryId) {
+       return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Категория с id=" + categoryId + " не найдена"));
     }
 }

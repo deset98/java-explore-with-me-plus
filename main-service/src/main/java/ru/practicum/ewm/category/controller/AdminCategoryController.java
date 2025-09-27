@@ -4,27 +4,28 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.category.dto.CategoryParamDto;
+import ru.practicum.ewm.category.dto.CategoryRequestDto;
 import ru.practicum.ewm.category.service.CategoryService;
 
+@Slf4j
+@Validated
 @RestController
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
-@Slf4j
-@Validated
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto addCategory(@Valid @RequestBody CategoryParamDto categoryParamDto) {
-        log.debug("Метод addCategory(); categoryParamDto={}", categoryParamDto);
+    public ResponseEntity<CategoryDto> addCategory(@Valid @RequestBody CategoryRequestDto categoryRequestDto) {
+        log.debug("Метод addCategory(); categoryParamDto={}", categoryRequestDto);
 
-        return categoryService.addCategory(categoryParamDto);
+        CategoryDto result = categoryService.add(categoryRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @DeleteMapping("/{catId}")
@@ -32,14 +33,15 @@ public class AdminCategoryController {
     public void deleteCategory(@PathVariable Long catId) {
         log.debug("Метод deleteCategory(); catId={}", catId);
 
-        categoryService.deleteCategory(catId);
+        categoryService.delete(catId);
     }
 
     @PatchMapping("/{catId}")
-    public CategoryDto updateCategory(@PathVariable Long catId,
-                                      @Valid @RequestBody CategoryParamDto categoryParamDto) {
-        log.debug("Метод updateCategory(); categoryParamDto={}", categoryParamDto);
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long catId,
+                                                      @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
+        log.debug("Метод updateCategory(); categoryParamDto={}", categoryRequestDto);
 
-        return categoryService.updateCategory(catId, categoryParamDto);
+        CategoryDto result = categoryService.update(catId, categoryRequestDto);
+        return ResponseEntity.ok(result);
     }
 }

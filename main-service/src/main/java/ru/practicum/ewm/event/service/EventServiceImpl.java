@@ -2,7 +2,6 @@ package ru.practicum.ewm.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,6 @@ import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.QEvent;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
-import ru.practicum.ewm.exception.ConditionNotMetException;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.ForbiddenException;
 import ru.practicum.ewm.exception.NotFoundException;
@@ -32,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
-import static ru.practicum.ewm.event.dto.UpdEventAdminRequest.StateAction.PUBLISH_EVENT;
 import static ru.practicum.ewm.event.model.State.PENDING;
 import static ru.practicum.ewm.event.model.State.PUBLISHED;
 
@@ -47,8 +44,6 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
 
     private final EventMapper eventMapper;
-
-    private final EntityManager em;
 
     @Transactional
     @Override
