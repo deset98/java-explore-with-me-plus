@@ -22,27 +22,21 @@ public class PublicEventController {
         this.eventService = eventService;
     }
 
-    /**
-     * обращение нужно записать в Stats
-     */
-
+    // обращение нужно записать в Stats
     @GetMapping
     public ResponseEntity<List<EventFullDto>> publicSearchMany(@Valid @ModelAttribute UserEventSearchParams params) {
         log.debug("Метод publicSearchMany(); {}", params);
 
-        List<EventFullDto> events = eventService.publicSearchMany(params);
+        List<EventFullDto> events = eventService.getPublicEventsBy(params);
         return ResponseEntity.ok(events);
     }
 
-    /**
-     * обращение нужно записать в Stats
-     */
-
+    // обращение нужно записать в Stats
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> publicSearchOne(@PathVariable @Positive Long eventId) {
         log.debug("Метод publicSearchOne(); eventId={}", eventId);
 
-        EventFullDto event = eventService.publicSearchOne(eventId);
+        EventFullDto event = eventService.getPublicById(eventId);
         return ResponseEntity.ok(event);
     }
 }

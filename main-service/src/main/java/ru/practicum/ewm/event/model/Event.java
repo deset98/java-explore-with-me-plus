@@ -17,6 +17,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @ToString
 public class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +30,7 @@ public class Event {
     @JoinColumn(name = "category_id",
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_events_categories",
-                                     value = ConstraintMode.CONSTRAINT))
+                    value = ConstraintMode.CONSTRAINT))
     @ToString.Exclude
     private Category category;
 

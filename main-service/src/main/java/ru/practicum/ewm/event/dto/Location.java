@@ -2,10 +2,7 @@ package ru.practicum.ewm.event.dto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.*;
-import lombok.NoArgsConstructor;
 
 @Embeddable
 @Getter
@@ -15,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Location {
+
     @Column(name = "location_lat", nullable = false)
     private Float lat;
 

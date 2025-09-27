@@ -9,19 +9,23 @@ import ru.practicum.ewm.event.dto.UpdEventUserRequest;
 import java.util.List;
 
 public interface EventService {
+
+    // Private API:
     EventFullDto create(Long userId, NewEventDto newEventDto);
 
-    EventFullDto findByIdAndInitiator_Id(Long userId, Long eventId);
+    EventFullDto getByUser(Long userId, Long eventId);
 
-    List<EventShortDto> findAll(Long userId, int from, int size);
+    List<EventShortDto> getAllByUser(Long userId, int from, int size);
 
-    EventFullDto userUpdate(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
+    EventFullDto updateByUser(Long userId, Long eventId, UpdEventUserRequest updEventUserRequest);
 
-    EventFullDto adminUpdate(Long eventId, UpdEventAdminRequest updEventAdminRequest);
+    // Admin API:
+    EventFullDto updateByAdmin(Long eventId, UpdEventAdminRequest updEventAdminRequest);
 
-    List<EventFullDto> adminSearch(AdminEventSearchParams params);
+    List<EventFullDto> searchForAdmin(AdminEventSearchParams params);
 
-    List<EventFullDto> publicSearchMany(UserEventSearchParams params);
+    // Public API:
+    List<EventFullDto> getPublicEventsBy(UserEventSearchParams params);
 
-    EventFullDto publicSearchOne(Long eventId);
+    EventFullDto getPublicById(Long eventId);
 }

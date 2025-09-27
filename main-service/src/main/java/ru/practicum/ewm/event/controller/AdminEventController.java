@@ -30,7 +30,7 @@ public class AdminEventController {
                                                     @RequestBody @Valid UpdEventAdminRequest updDto) {
         log.debug("Метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
 
-        EventFullDto eventFullDto = eventService.adminUpdate(eventId, updDto);
+        EventFullDto eventFullDto = eventService.updateByAdmin(eventId, updDto);
         return ResponseEntity.ok(eventFullDto);
     }
 
@@ -38,7 +38,7 @@ public class AdminEventController {
     public ResponseEntity<List<EventFullDto>> adminSearch(@Valid @ModelAttribute AdminEventSearchParams params) {
         log.debug("Метод adminSearchEvents; {}", params);
 
-        List<EventFullDto> events = eventService.adminSearch(params);
+        List<EventFullDto> events = eventService.searchForAdmin(params);
         return ResponseEntity.ok(events);
     }
 }

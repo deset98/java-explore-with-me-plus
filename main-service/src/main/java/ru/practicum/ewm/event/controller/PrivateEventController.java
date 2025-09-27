@@ -44,29 +44,28 @@ public class PrivateEventController {
     public ResponseEntity<List<EventShortDto>> findAll(@PathVariable("userId") @NotNull @Positive Long userId,
                                                        @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                        @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
-        log.debug("PrivateEventController; метод findAll(); userId={}, from={}, size={}", userId, from, size);
+        log.debug("Метод findAll(); userId={}, from={}, size={}", userId, from, size);
 
-        List<EventShortDto> result = eventService.findAll(userId, from, size);
+        List<EventShortDto> result = eventService.getAllByUser(userId, from, size);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> find(@PathVariable("userId") @NotNull @Positive Long userId,
                                              @PathVariable("eventId") @NotNull @Positive Long eventId) {
-        log.debug("PrivateEventController; метод find(); userId={}, eventId={}", userId, eventId);
+        log.debug("Метод find(); userId={}, eventId={}", userId, eventId);
 
-        EventFullDto result = eventService.findByIdAndInitiator_Id(userId, eventId);
+        EventFullDto result = eventService.getByUser(userId, eventId);
         return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventFullDto> update(@PathVariable("userId") @NotNull @Positive Long userId,
                                                @PathVariable("eventId") @NotNull @Positive Long eventId,
-                                               @RequestBody @Valid final UpdEventUserRequest updEventUserRequest) {
-        log.debug("PrivateEventController; метод update(); userId={}, eventId={}, dto={}",
-                userId, eventId, updEventUserRequest);
+                                               @RequestBody @Valid final UpdEventUserRequest updDto) {
+        log.debug("Метод update(); userId={}, eventId={}, updDto={}", userId, eventId, updDto);
 
-        EventFullDto result = eventService.userUpdate(userId, eventId, updEventUserRequest);
+        EventFullDto result = eventService.updateByUser(userId, eventId, updDto);
         return ResponseEntity.ok(result);
     }
 

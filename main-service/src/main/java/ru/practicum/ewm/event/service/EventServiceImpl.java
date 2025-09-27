@@ -39,23 +39,23 @@ import static ru.practicum.ewm.event.model.State.PUBLISHED;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
-    private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
 
     private final EventMapper eventMapper;
 
     @Transactional
     @Override
-    public EventFullDto create(Long userId, final NewEventDto newEventDto) {
-        log.debug("В EventServiceImpl вызван метод для СОЗДАНИЯ event");
+    public EventFullDto create(Long userId, final NewEventDto newDto) {
+        log.debug("Метод create(); userId={}, newDto={}", userId, newDto);
 
-        this.startDateIsValid(newEventDto.getEventDate());
+        this.startDateIsValid(newDto.getEventDate());
         User user = this.findUser(userId);
-        Category category = this.findCategory(newEventDto.getCategory());
+        Category category = this.findCategory(newDto.getCategory());
 
-        Event event = eventMapper.toEntity(newEventDto);
-        event.setLocation(newEventDto.getLocation());
+        Event event = eventMapper.toEntity(newDto);
+        event.setLocation(newDto.getLocation());
         event.setInitiator(user);
         event.setCategory(category);
         event = eventRepository.save(event);
@@ -66,28 +66,30 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> findAll(Long userId, int from, int size) {
-        log.debug("В EventServiceImpl вызван метод для ПОЛУЧЕНИЯ event user id={}", userId);
+    public List<EventShortDto> getAllByUser(Long userId, int from, int size) {
+        log.debug("Метод getAllByUser(); userId={}", userId);
 
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size, Sort.by("eventDate").descending());
         Page<Event> events = eventRepository.findAllByInitiator_Id(userId, pageable);
+
         return events.map(eventMapper::toShortDto).getContent();
     }
 
     @Override
-    public EventFullDto findByIdAndInitiator_Id(Long userId, Long eventId) {
-        log.debug("В EventServiceImpl вызван метод для ПОЛУЧЕНИЯ event id={} от user id={}", eventId, userId);
+    public EventFullDto getByUser(Long userId, Long eventId) {
+        log.debug("Метод getByUser(); eventId={}, userId={}", eventId, userId);
 
         Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} у user id={} не найдено", eventId, userId));
+
         return eventMapper.toFullDto(event);
     }
 
     @Transactional
     @Override
-    public EventFullDto userUpdate(Long userId, Long eventId, UpdEventUserRequest updDto) {
-        log.debug("Сервис EventServiceImpl; метод userUpdate(); userId={}, eventId: {}, dto={}",
+    public EventFullDto updateByUser(Long userId, Long eventId, UpdEventUserRequest updDto) {
+        log.debug("Метод userUpdate(); userId={}, eventId: {}, dto={}",
                 userId, eventId, updDto);
 
         this.checkEventDateForUpdate(updDto);
@@ -123,17 +125,13 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
+    // Admin API:
     @Transactional
     @Override
-    public EventFullDto adminUpdate(Long eventId, UpdEventAdminRequest updDto) {
-        log.debug("Сервис EventServiceImpl; метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
+    public EventFullDto updateByAdmin(Long eventId, UpdEventAdminRequest updDto) {
+        log.debug("Метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
 
         Event event = this.findEvent(eventId);
-
-//        if (updDto.getStateAction() != null &&
-//                (updDto.getStateAction().equals(PUBLISH_EVENT) &&
-//                        (event.getState().equals(State.CANCELED) || event.getState().equals(PUBLISHED)))) {
-//        }
 
         eventMapper.updateFromDto(updDto, event);
 
@@ -147,9 +145,7 @@ public class EventServiceImpl implements EventService {
                         event.setPublishedOn(Instant.now());
                     } else if (event.getState().equals(State.CANCELED) || event.getState().equals(PUBLISHED)) {
                         throw new ConflictException("Event id={} нельзя опубликовать; его status={}", eventId, event.getState());
-                    } /*else {
-                        throw new ConditionNotMetException("Для публикации Event статус должен быть PENDING");
-                    }*/
+                    }
 
                     log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
                             event.getState(), event.getPublishedOn());
@@ -174,7 +170,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> adminSearch(AdminEventSearchParams params) {
+    public List<EventFullDto> searchForAdmin(AdminEventSearchParams params) {
         log.debug("Метод adminSearchEvents; {}", params);
 
         QEvent event = QEvent.event;
@@ -216,8 +212,9 @@ public class EventServiceImpl implements EventService {
         return events.map(eventMapper::toFullDto).getContent();
     }
 
+    // Public API:
     @Override
-    public List<EventFullDto> publicSearchMany(UserEventSearchParams params) {
+    public List<EventFullDto> getPublicEventsBy(UserEventSearchParams params) {
         log.debug("Метод publicSearchMany; {}", params);
 
         QEvent event = QEvent.event;
@@ -279,15 +276,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto publicSearchOne(Long eventId) {
+    public EventFullDto getPublicById(Long eventId) {
+        log.debug("Метод getPublicById(); eventId={}", eventId);
 
         Event event = eventRepository.findByIdAndState(eventId, PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
+
         event.setViews(event.getViews() + 1);
         event = eventRepository.save(event);
 
         return eventMapper.toFullDto(event);
     }
+
 
     private User findUser(Long userId) {
         log.debug("Поиск User id={} в репозитории", userId);
