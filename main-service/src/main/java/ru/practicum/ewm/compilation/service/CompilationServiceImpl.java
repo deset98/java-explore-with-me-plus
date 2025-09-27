@@ -9,15 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
-import ru.practicum.ewm.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.ewm.compilation.dto.UpdateCompilationDto;
 import ru.practicum.ewm.compilation.mapper.CompilationMapper;
-import ru.practicum.ewm.compilation.model.*;
+import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.NotFoundException;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -37,15 +36,12 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto create(NewCompilationDto newDto) {
         log.debug("Метод create(); newDto={}", newDto);
 
-        List<Event> events = eventRepository.getEventsByIdIn(newDto.getEvents());
+        List<Event> events = this.findEventsBy(newDto.getEvents());
 
-        if (events.size() != newDto.getEvents().size()) {
-            throw new NotFoundException("Некоторые события не найдены");
-        }
+        log.info(newDto.getEvents().toString());
 
-        log.info(events.toString());
-
-        Compilation compilation = compilationMapper.toEntity(newDto, events);
+        Compilation compilation = compilationMapper.toEntity(newDto);
+        compilation.setEvents(events);
         compilation = compilationRepository.save(compilation);
 
         log.info(compilation.getEvents().toString());
@@ -55,26 +51,14 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     @Transactional
-    public CompilationDto update(Long compId, UpdateCompilationRequest updDto) {
+    public CompilationDto update(Long compId, UpdateCompilationDto updDto) {
         log.debug("Метод update(); compId={}, updDto={}", compId, updDto);
 
-        Compilation currentCompilation = this.findCompilationBy(compId);
+        Compilation compilation = this.findCompilationBy(compId);
+        compilation = compilationMapper.updateFromDto(updDto, compilation);
+        compilation = compilationRepository.save(compilation);
 
-        List<Event> events = eventRepository.getEventsByIdIn(updDto.getEvents());
-
-        if (updDto.getEvents().size() == 1 && updDto.getEvents().getFirst() == 0) {
-            events = Collections.emptyList();
-        } else {
-            if (events.size() != updDto.getEvents().size()) {
-                throw new NotFoundException("Некоторые события не найдены");
-            }
-        }
-
-        Compilation updatedCompilation = compilationMapper.toEntity(updDto, events);
-        compilationMapper.updateFields(currentCompilation, updatedCompilation);
-        Compilation result = compilationRepository.save(currentCompilation);
-
-        return compilationMapper.toDto(result);
+        return compilationMapper.toDto(compilation);
     }
 
     @Override
@@ -90,16 +74,13 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> getAllBy(Boolean pinned, Integer from, Integer size) {
         log.debug("Метод getAllBy(); pinned={}, from={}, size={}", pinned, from, size);
 
-        Pageable page = PageRequest.of(from / size, size);
-        Page<Compilation> comps;
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Compilation> compilations = pinned != null
+                ? compilationRepository.findByPinned(pinned, pageable): compilationRepository.findAll(pageable);
 
-        if (pinned != null) {
-            comps = compilationRepository.findAllByPinned(pinned, page);
-        } else {
-            comps = compilationRepository.findAll(page);
-        }
-
-        return comps.stream()
+        return compilations.getContent()
+                .stream()
                 .map(compilationMapper::toDto)
                 .toList();
     }
@@ -116,5 +97,14 @@ public class CompilationServiceImpl implements CompilationService {
 
     private Compilation findCompilationBy(Long compId) {
         return compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Подборка не найдена"));
+    }
+
+    private List<Event> findEventsBy(List<Long> eventsIds) {
+        List<Event> events = eventRepository.findEventsByIdIn(eventsIds);
+
+        if (events.size() != eventsIds.size()) {
+            throw new NotFoundException("Некоторые события не найдены");
+        }
+        return events;
     }
 }

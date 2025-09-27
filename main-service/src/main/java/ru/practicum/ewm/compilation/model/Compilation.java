@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.event.model.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,7 +27,7 @@ public class Compilation {
                     foreignKey = @ForeignKey(name = "fk_compilation_events__compilations")),
             inverseJoinColumns = @JoinColumn(name = "event_id",
                     foreignKey = @ForeignKey(name = "fk_compilation_events__events")))
-    private List<Event> events;
+    private List<Event> events = new ArrayList<>();
 
     @Column(nullable = false)
     private Boolean pinned;

@@ -5,17 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateCompilationRequest {
+public class UpdateCompilationDto {
 
-    private List<Long> events = new ArrayList<>();
+    private List<Long> events;
 
-    private Boolean pinned = false;
+    private Boolean pinned;
 
     @Length(max = 50)
     private String title;

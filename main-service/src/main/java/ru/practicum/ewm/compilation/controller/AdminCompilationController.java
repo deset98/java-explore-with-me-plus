@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
-import ru.practicum.ewm.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.ewm.compilation.dto.UpdateCompilationDto;
 import ru.practicum.ewm.compilation.service.CompilationService;
 
 @Slf4j
@@ -39,7 +39,7 @@ public class AdminCompilationController {
 
     @PatchMapping("/{compId}")
     public ResponseEntity<CompilationDto> updateCompilation(@PathVariable Long compId,
-                                                            @Valid @RequestBody UpdateCompilationRequest updDto) {
+                                                            @Valid @RequestBody UpdateCompilationDto updDto) {
         log.debug("Метод updateCompilation(); compId={}, updDto={}", compId, updDto);
 
         CompilationDto result = compilationService.update(compId, updDto);
