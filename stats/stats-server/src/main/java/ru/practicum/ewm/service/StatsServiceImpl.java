@@ -1,54 +1,58 @@
 package ru.practicum.ewm.service;
 
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.RequestHitDto;
-import ru.practicum.ewm.RequestStatDto;
-import ru.practicum.ewm.StatDto;
-import ru.practicum.ewm.entity.EndpointHit;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import ru.practicum.ewm.NewHitDto;
+import ru.practicum.ewm.RequestStatsParams;
+import ru.practicum.ewm.ResponseExtHitDto;
+import ru.practicum.ewm.ResponseShortHitDto;
+import ru.practicum.ewm.entity.Hit;
 import ru.practicum.ewm.mapper.HitMapper;
-import ru.practicum.ewm.repository.RequestHitRepository;
+import ru.practicum.ewm.repository.StatsRepository;
 
-import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
+@Service
+@Validated
+@RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
 
-    private final RequestHitRepository requestHitRepository;
-    private final HitMapper mapper;
+    private final StatsRepository statsRepository;
+
+    private final HitMapper hitMapper;
 
     @Override
-    public ResponseEntity<Void> createEndpointHit(RequestHitDto requestHitDto) {
-        EndpointHit hitEntity = mapper.toEntity(requestHitDto);
-        EndpointHit savedHit = requestHitRepository.save(hitEntity);
-        log.debug("Сохранен хит  {}", savedHit);
-        return ResponseEntity.created(URI.create("/hit/" + savedHit.getId())).build();
+    public ResponseShortHitDto create(NewHitDto hitDto) {
+
+        Hit hit = hitMapper.toEntity(hitDto);
+        hit = statsRepository.save(hit);
+
+        log.debug("Сохранен хит  {}", hit);
+
+        return hitMapper.toShortResponseDto(hit);
     }
 
     @Override
-    public List<StatDto> getViewStats(LocalDateTime start, LocalDateTime end, String app, List<String> uris, Boolean unique) {
-        RequestStatDto requestStatDto = new RequestStatDto(start, end, uris, unique);
-        log.debug("Сервис выполняет getViewStats");
-        return getViewStats(requestStatDto);
-    }
+    public List<ResponseExtHitDto> getStats(RequestStatsParams params) {
+        log.debug("Метод getStats(); params={}", params);
 
-    private List<StatDto> getViewStats(RequestStatDto dto) {
-        if (!dto.isValidPeriod()) {
-            throw new ValidationException("End date must be after start date");
+        if (!params.getEnd().isAfter(params.getStart())) {
+            throw new ValidationException("Дата конца не может быть раньше начала");
         }
-        if (dto.isUnique()) {
-            log.debug("Вызван метод репозитория findUniqueStats()");
-            return requestHitRepository.findUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
-        } else {
-            log.debug("Вызван метод репозитория findNotUniqueStats()");
-            return requestHitRepository.findNotUniqueStats(dto.getStart().toString(), dto.getEnd().toString(), dto.getUris());
-        }
+
+        List<ResponseExtHitDto> stats = statsRepository.getStats(
+                params.getStart().toInstant(ZoneOffset.UTC),
+                params.getEnd().toInstant(ZoneOffset.UTC),
+                params.getUris(),
+                params.isUnique());
+
+        return stats;
     }
 }

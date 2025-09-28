@@ -9,8 +9,11 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatDto {
+public class ResponseExtHitDto extends ResponseShortHitDto {
+
     private String app;
+
     private String uri;
+
     private long hits;
 }

@@ -1,8 +1,10 @@
 package ru.practicum.ewm.entity;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "endpoint_hit")
@@ -12,16 +14,21 @@ import org.antlr.v4.runtime.misc.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EndpointHit {
+public class Hit {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
+
+    @Column
     private String app;
-    @NotNull
+
+    @Column
     private String uri;
-    @NotNull
+
+    @Column
     private String ip;
-    @NotNull
-    private String timestamp;
+
+    @Column
+    private Instant timestamp;
 }

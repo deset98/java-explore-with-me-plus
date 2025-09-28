@@ -2,6 +2,7 @@ package ru.practicum.ewm.event.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +14,13 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/events")
 public class PublicEventController {
 
     private final EventService eventService;
 
-    public PublicEventController(final EventService eventService) {
-        this.eventService = eventService;
-    }
+//    private final StatsClient statsClient;
 
     // обращение нужно записать в Stats
     @GetMapping
@@ -30,6 +30,25 @@ public class PublicEventController {
         List<EventFullDto> events = eventService.getPublicEventsBy(params);
         return ResponseEntity.ok(events);
     }
+
+//        /////////////////////////////////////////
+//
+//        String clientIp = getClientIp(request);
+//        String timestamp = LocalDateTime.now().format(FORMATTER);
+//
+//        RequestHitDto endpointHitDto = RequestHitDto.builder()
+//                .app("events")
+//                .uri("/events/" + eventId)
+//                .ip(clientIp)
+//                .timestamp(timestamp)
+//                .build();
+//
+//        statsClient.hit(endpointHitDto);
+//
+//
+//
+//        /////////////////////////////////////////
+
 
     // обращение нужно записать в Stats
     @GetMapping("/{eventId}")

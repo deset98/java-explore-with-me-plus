@@ -19,8 +19,8 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
+@RequestMapping("/users/{userId}/events")
 public class PrivateEventController {
 
     private final EventService eventService;

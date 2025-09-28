@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestHitDto {
+public class NewHitDto {
+
     @NotBlank(message = "Название сервиса не может быть пустым")
     private String app;
 

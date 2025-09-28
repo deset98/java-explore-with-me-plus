@@ -1,14 +1,15 @@
 package ru.practicum.ewm.service;
 
-import org.springframework.http.ResponseEntity;
-import ru.practicum.ewm.RequestHitDto;
-import ru.practicum.ewm.StatDto;
+import ru.practicum.ewm.NewHitDto;
+import ru.practicum.ewm.RequestStatsParams;
+import ru.practicum.ewm.ResponseExtHitDto;
+import ru.practicum.ewm.ResponseShortHitDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatsService {
-    ResponseEntity<Void> createEndpointHit(RequestHitDto requestHitDto);
 
-    List<StatDto> getViewStats(LocalDateTime start, LocalDateTime end, String app, List<String> uris, Boolean unique);
+    ResponseShortHitDto create(NewHitDto hitDto);
+
+    List<ResponseExtHitDto> getStats(RequestStatsParams statsDto);
 }
