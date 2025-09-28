@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.event.model.State;
+import ru.practicum.ewm.event.model.EventState;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,9 +19,11 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
 
     Optional<Event> findByIdAndInitiatorId(Long eventId, Long userId);
 
-    Optional<Event> findByIdAndState(Long eventId, State state);
+    Optional<Event> findByIdAndState(Long eventId, EventState state);
 
     List<Event> findEventsByIdIn(Collection<Long> ids);
 
     boolean existsByCategoryId(Long categoryId);
+
+    boolean existsByIdAndInitiatorId(Long eventId, Long userId);
 }

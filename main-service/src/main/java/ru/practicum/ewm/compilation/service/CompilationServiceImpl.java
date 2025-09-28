@@ -18,6 +18,7 @@ import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -56,7 +57,14 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = this.findCompilationBy(compId);
         compilation = compilationMapper.updateFromDto(updDto, compilation);
+
+        if (updDto.getEvents() != null) {
+            List<Event> events = eventRepository.findAllById(updDto.getEvents());
+            compilation.setEvents(events);
+        }
         compilation = compilationRepository.save(compilation);
+
+        log.debug("compilation={}", compilation);
 
         return compilationMapper.toDto(compilation);
     }
@@ -77,7 +85,7 @@ public class CompilationServiceImpl implements CompilationService {
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
         Page<Compilation> compilations = pinned != null
-                ? compilationRepository.findByPinned(pinned, pageable): compilationRepository.findAll(pageable);
+                ? compilationRepository.findByPinned(pinned, pageable) : compilationRepository.findAll(pageable);
 
         return compilations.getContent()
                 .stream()
@@ -91,6 +99,8 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = this.findCompilationBy(compId);
 
+        log.debug("compilation={}", compilation);
+
         return compilationMapper.toDto(compilation);
     }
 
@@ -99,7 +109,7 @@ public class CompilationServiceImpl implements CompilationService {
         return compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Подборка не найдена"));
     }
 
-    private List<Event> findEventsBy(List<Long> eventsIds) {
+    private List<Event> findEventsBy(Set<Long> eventsIds) {
         List<Event> events = eventRepository.findEventsByIdIn(eventsIds);
 
         if (events.size() != eventsIds.size()) {

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.ewm.event.model.State;
+import ru.practicum.ewm.event.model.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +15,7 @@ public class AdminEventSearchParams {
 
     private List<Long> users;
     private List<Long> categories;
-    private Set<State> states;
+    private Set<EventState> states;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime rangeStart;

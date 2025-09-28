@@ -7,15 +7,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewCompilationDto {
 
-    private List<Long> events = new ArrayList<>();
+    private Set<Long> events = new HashSet<>();
 
     @NotNull
     private Boolean pinned = false;

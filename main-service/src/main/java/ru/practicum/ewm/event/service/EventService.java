@@ -5,6 +5,7 @@ import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdEventUserRequest;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 
 import java.util.List;
 
@@ -28,4 +29,8 @@ public interface EventService {
     List<EventFullDto> getPublicEventsBy(UserEventSearchParams params);
 
     EventFullDto getPublicById(Long eventId);
+
+    List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
+
+    UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto);
 }

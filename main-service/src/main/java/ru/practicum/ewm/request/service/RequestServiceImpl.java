@@ -5,14 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.event.model.State;
+import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.mapper.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.dto.ParticipationRequestDto;
-import ru.practicum.ewm.request.model.Status;
+import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
@@ -43,38 +43,38 @@ public class RequestServiceImpl implements RequestService {
         User user = this.findUserBy(userId);
         Event event = this.findEventBy(eventId);
 
-        if (event.getInitiator().equals(user)) {
+        if (eventRepository.existsByIdAndInitiatorId(eventId, userId)) {
             throw new ConflictException("Нельзя участвовать в собственном событии");
         }
 
-        List<Request> requests = requestRepository.findAllByEventId(eventId);
-        Optional<Event> initiatorEvent = eventRepository.findByIdAndInitiatorId(userId, eventId);
-
-        boolean requestExists = requests.stream()
-                .anyMatch(r -> r.getRequester().getId().equals(userId));
-
-        if  (requestExists) {
+        if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
             throw new ConflictException("Request уже создан ранее");
         }
-        if (initiatorEvent.isPresent()) {
-            if (Objects.equals(initiatorEvent.get().getInitiator().getId(), userMapper.toShortDto(user).getId())) {
-                throw new ConflictException("Инициатор события не может добавить запрос на участие в своём событии");
-            }
-        }
-        if (!event.getState().equals(State.PUBLISHED)) {
+
+        if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Нельзя участвовать в неопубликованном событии");
         }
-        if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= requests.size()) {
+
+        long limit = event.getParticipantLimit();
+        long confirm = event.getConfirmedRequests();
+
+        if (limit > 0 && confirm >= limit) {
             throw new ConflictException("Достигнут лимит запросов на участие в событии");
         }
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            Request request = Request.builder().requester(user).event(event).status(Status.CONFIRMED).build();
-            request = requestRepository.save(request);
 
-            return requestMapper.toDto(request);
+        RequestStatus status =
+                (!event.getRequestModeration() || limit == 0) ? RequestStatus.CONFIRMED : RequestStatus.PENDING;
+
+        if (status == RequestStatus.CONFIRMED) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
         }
 
-        Request request = Request.builder().requester(user).event(event).status(Status.PENDING).build();
+        Request request = Request.builder()
+                .requester(user)
+                .event(event)
+                .status(status)
+                .build();
         request = requestRepository.save(request);
 
         return requestMapper.toDto(request);
@@ -98,7 +98,7 @@ public class RequestServiceImpl implements RequestService {
 
         this.findUserBy(userId);
         Request request = this.findRequestBy(requestId);
-        request.setStatus(Status.CANCELED);
+        request.setStatus(RequestStatus.CANCELED);
 
         if (!request.getRequester().getId().equals(userId)) {
             throw new ConflictException("User id={} не является автором этого запроса", userId);

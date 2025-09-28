@@ -25,7 +25,6 @@ public class UpdEventAdminRequest {
     @Size(min = 20, max = 7000)
     private String description;
 
-    //    @FutureAfterHours(hours = 2)
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
@@ -44,7 +43,5 @@ public class UpdEventAdminRequest {
     @Size(min = 3, max = 120)
     private String title;
 
-    public enum StateAction {
-        PUBLISH_EVENT, REJECT_EVENT
-    }
+    public enum StateAction {PUBLISH_EVENT, REJECT_EVENT}
 }

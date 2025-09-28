@@ -84,7 +84,7 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private State state = State.PENDING;
+    private EventState state = EventState.PENDING;
 
     @Column(length = 120,
             nullable = false)

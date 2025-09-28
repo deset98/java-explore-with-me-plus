@@ -1,21 +1,21 @@
 package ru.practicum.ewm.compilation.dto;
 
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateCompilationDto {
 
-    private List<Long> events;
+    private Set<Long> events;
 
     private Boolean pinned;
 
-    @Length(max = 50)
+    @Size(max = 50)
     private String title;
 }

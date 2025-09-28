@@ -36,5 +36,5 @@ public class Request {
     private Instant created = Instant.now();
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private RequestStatus status;
 }

@@ -10,16 +10,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.model.QEvent;
-import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
+import ru.practicum.ewm.request.dto.ParticipationRequestDto;
+import ru.practicum.ewm.request.mapper.RequestMapper;
+import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
@@ -29,8 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
-import static ru.practicum.ewm.event.model.State.PENDING;
-import static ru.practicum.ewm.event.model.State.PUBLISHED;
+import static ru.practicum.ewm.event.model.EventState.CANCELED;
 
 @Slf4j
 @Service
@@ -40,18 +45,21 @@ public class EventServiceImpl implements EventService {
 
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final RequestRepository requestRepository;
     private final CategoryRepository categoryRepository;
 
     private final EventMapper eventMapper;
+    private final RequestMapper requestMapper;
 
-    @Transactional
+    // Private API:
     @Override
+    @Transactional
     public EventFullDto create(Long userId, final NewEventDto newDto) {
         log.debug("Метод create(); userId={}, newDto={}", userId, newDto);
 
-        this.startDateIsValid(newDto.getEventDate());
-        User user = this.findUser(userId);
-        Category category = this.findCategory(newDto.getCategory());
+        this.checkStartDate(newDto.getEventDate());
+        User user = this.findUserBy(userId);
+        Category category = this.findCategoryBy(newDto.getCategory());
 
         Event event = eventMapper.toEntity(newDto);
         event.setLocation(newDto.getLocation());
@@ -85,8 +93,8 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public EventFullDto updateByUser(Long userId, Long eventId, UpdEventUserRequest updDto) {
         log.debug("Метод userUpdate(); userId={}, eventId: {}, dto={}",
                 userId, eventId, updDto);
@@ -96,23 +104,23 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event id={} не найдено; User id={} ", eventId, userId));
 
-        if (event.getState().equals(PUBLISHED)) {
+        if (event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Event id={} нельзя изменить; его status={}", eventId, event.getState());
         }
 
         log.debug("Найден Event в репозитории; event={}", event);
 
-        if (!(event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING))) {
+        if (!(event.getState().equals(CANCELED) || event.getState().equals(EventState.PENDING))) {
             throw new ConflictException("Event id={} нельзя обновить пока оно опубликовано", eventId);
         }
         if (updDto.getCategory() != null) {
-            event.setCategory(this.findCategory(updDto.getCategory()));
+            event.setCategory(this.findCategoryBy(updDto.getCategory()));
         }
 
         if (updDto.getStateAction() != null) {
             switch (updDto.getStateAction()) {
-                case SEND_TO_REVIEW -> event.setState(State.PENDING);
-                case CANCEL_REVIEW -> event.setState(State.CANCELED);
+                case SEND_TO_REVIEW -> event.setState(EventState.PENDING);
+                case CANCEL_REVIEW -> event.setState(CANCELED);
             }
         }
 
@@ -124,13 +132,156 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
-    // Admin API:
-    @Transactional
     @Override
+    public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
+        log.debug("Метод getUserRequests(); userId={}, eventId={}", userId, eventId);
+
+        List<Request> requests = requestRepository.findAllByEventId(eventId);
+        return requests.stream()
+                .map(requestMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto) {
+        log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
+
+
+
+        Event event = this.findEventBy(eventId);
+        List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
+
+        if (requests.isEmpty()) {
+            return UpdRequestsStatusResult.builder()
+                    .confirmedRequests(List.of())
+                    .rejectedRequests(List.of())
+                    .build();
+        }
+
+        UpdRequestsStatusResult result;
+
+        switch (updDto.getStatus()) {
+            case UpdRequestStatus.CONFIRMED -> {
+                if (event.getConfirmedRequests() == event.getParticipantLimit().longValue()) {
+                    throw new ConflictException("На Event id={} больше нет мест", eventId);
+                }
+
+                int availableSlots = event.getParticipantLimit() == 0
+                        ? requests.size()
+                        : event.getParticipantLimit().intValue() - event.getConfirmedRequests().intValue();
+
+                List<Request> toConfirm = requests.size() <= availableSlots
+                        ? requests
+                        : requests.subList(0, availableSlots);
+
+                List<Request> toReject = requests.size() <= availableSlots
+                        ? List.of()
+                        : requests.subList(availableSlots, requests.size());
+
+                List<ParticipationRequestDto> confirmedDtos = processRequests(toConfirm, RequestStatus.CONFIRMED);
+                List<ParticipationRequestDto> rejectedDtos = processRequests(toReject, RequestStatus.REJECTED);
+
+                // Обновляем количество подтверждённых
+                event.setConfirmedRequests(event.getConfirmedRequests() + confirmedDtos.size());
+                eventRepository.save(event);
+
+                result = UpdRequestsStatusResult.builder()
+                        .confirmedRequests(confirmedDtos)
+                        .rejectedRequests(rejectedDtos)
+                        .build();
+            }
+
+            case UpdRequestStatus.REJECTED -> {
+                List<ParticipationRequestDto> rejectedDtos = requests.stream()
+                        .peek(r -> {
+                            if (r.getStatus() == RequestStatus.CONFIRMED) {
+                                throw new ConflictException("Нельзя отклонить подтвержденный Request");
+                            }
+                            r.setStatus(RequestStatus.REJECTED);
+                        })
+                        .map(requestMapper::toDto)
+                        .toList();
+
+                result = UpdRequestsStatusResult.builder()
+                        .confirmedRequests(List.of())
+                        .rejectedRequests(rejectedDtos)
+                        .build();
+            }
+
+            default -> throw new IllegalArgumentException("Неизвестный статус: " + updDto.getStatus());
+        }
+
+        return result;
+    }
+
+//    @Override
+//    @Transactional
+//    public UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto) {
+//        log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
+//
+//        Event event = this.findEventBy(eventId);
+//        List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
+//
+//        UpdRequestsStatusResult result = new UpdRequestsStatusResult();
+//
+//
+//        if (event.getConfirmedRequests() == event.getParticipantLimit().longValue()) {
+//            throw new ConflictException("На Event id={} больше нет мест", eventId);
+//        }
+//
+//        switch (updDto.getStatus()) {
+//            case UpdRequestStatus.CONFIRMED -> {
+//                if (event.getParticipantLimit() == 0) {
+//                    List<ParticipationRequestDto> confirmed = processRequests(requests, RequestStatus.CONFIRMED);
+//                    result = UpdRequestsStatusResult.builder()
+//                            .confirmedRequests(confirmed)
+//                            .rejectedRequests(List.of())
+//                            .build();
+//                    event.setConfirmedRequests(event.getConfirmedRequests() + confirmed.size());
+//                    eventRepository.save(event);
+//                } else if (!event.getRequestModeration()) {
+//                    int limit = event.getParticipantLimit() - event.getConfirmedRequests().intValue();
+//                    if (requests.size() <= limit) {
+//                        List<ParticipationRequestDto> confirmed = processRequests(requests, RequestStatus.CONFIRMED);
+//                        result = UpdRequestsStatusResult.builder()
+//                                .confirmedRequests(processRequests(requests, RequestStatus.CONFIRMED))
+//                                .rejectedRequests(List.of())
+//                                .build();
+//                        event.setConfirmedRequests(event.getConfirmedRequests() + confirmed.size());
+//                        eventRepository.save(event);
+//                    } else {
+//                        limit = requests.size() - limit;
+//                        List<ParticipationRequestDto> confirmed =
+//                                processRequests(requests.subList(0, limit), RequestStatus.CONFIRMED);
+//                        List<ParticipationRequestDto> rejected =
+//                                processRequests(requests.subList(limit, requests.size()), RequestStatus.REJECTED);
+//                        result = UpdRequestsStatusResult.builder()
+//                                .confirmedRequests(confirmed)
+//                                .rejectedRequests(rejected)
+//                                .build();
+//                    }
+//                }
+//            }
+//            case UpdRequestStatus.REJECTED -> requests.forEach(request -> {
+//                switch (request.getStatus()) {
+//                    case RequestStatus.PENDING -> request.setStatus(RequestStatus.REJECTED);
+//                    case RequestStatus.CONFIRMED ->
+//                            throw new ConflictException("Нельзя отклонить подтвержденный Request");
+//                }
+//            });
+//        }
+//        return result;
+//    }
+
+
+    // Admin API:
+    @Override
+    @Transactional
     public EventFullDto updateByAdmin(Long eventId, UpdEventAdminRequest updDto) {
         log.debug("Метод adminUpdateEvent(); eventId: {}, dto={}", eventId, updDto);
 
-        Event event = this.findEvent(eventId);
+        Event event = this.findEventBy(eventId);
 
         eventMapper.updateFromDto(updDto, event);
 
@@ -139,20 +290,22 @@ public class EventServiceImpl implements EventService {
         if (updDto.getStateAction() != null) {
             switch (updDto.getStateAction()) {
                 case PUBLISH_EVENT -> {
-                    if (event.getState().equals(PENDING)) {
-                        event.setState(PUBLISHED);
+                    if (event.getState().equals(EventState.PENDING)) {
+                        event.setState(EventState.PUBLISHED);
                         event.setPublishedOn(Instant.now());
-                    } else if (event.getState().equals(State.CANCELED) || event.getState().equals(PUBLISHED)) {
-                        throw new ConflictException("Event id={} нельзя опубликовать; его status={}", eventId, event.getState());
+                    } else if (event.getState().equals(CANCELED) ||
+                            event.getState().equals(EventState.PUBLISHED)) {
+                        throw new ConflictException("Event id={} нельзя опубликовать; его status={}",
+                                eventId, event.getState());
                     }
 
                     log.debug("Для Event назначен статус={}, время публикации publishedOn={}",
                             event.getState(), event.getPublishedOn());
                 }
                 case REJECT_EVENT -> {
-                    if (event.getState().equals(State.PENDING)) {
-                        event.setState(State.CANCELED);
-                    } else if (event.getState().equals(PUBLISHED)) {
+                    if (event.getState().equals(EventState.PENDING)) {
+                        event.setState(CANCELED);
+                    } else if (event.getState().equals(EventState.PUBLISHED)) {
                         throw new ConflictException("Опубликованные Event не могут быть отклонены");
                     }
 
@@ -219,7 +372,7 @@ public class EventServiceImpl implements EventService {
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();
 
-        conditions.add(event.state.eq(PUBLISHED));
+        conditions.add(event.state.eq(EventState.PUBLISHED));
 
         if (params.getText() != null && !params.getText().isEmpty()) {
             conditions.add(
@@ -278,7 +431,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getPublicById(Long eventId) {
         log.debug("Метод getPublicById(); eventId={}", eventId);
 
-        Event event = eventRepository.findByIdAndState(eventId, PUBLISHED)
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
 
         event.setViews(event.getViews() + 1);
@@ -287,29 +440,34 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toFullDto(event);
     }
 
-
-    private User findUser(Long userId) {
-        log.debug("Поиск User id={} в репозитории", userId);
-
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User id={} не найден", userId));
+    private List<ParticipationRequestDto> processRequests(List<Request> requests, RequestStatus status) {
+        return requests.stream()
+                .peek(r -> r.setStatus(status))
+                .map(requestMapper::toDto)
+                .toList();
     }
 
-    private Category findCategory(Long categoryId) {
+    private User findUserBy(Long userId) {
+        log.debug("Поиск User id={} в репозитории", userId);
+
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User id={} не найден", userId));
+    }
+
+    private Category findCategoryBy(Long categoryId) {
         log.debug("Поиск Category id={} в репозитории", categoryId);
 
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Объект Category id={} не найден", categoryId));
     }
 
-    private Event findEvent(Long eventId) {
+    private Event findEventBy(Long eventId) {
         log.debug("Поиск Event id={} в репозитории", eventId);
 
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Объект Event id={} не найден", eventId));
     }
 
-    private void startDateIsValid(LocalDateTime eventDate) {
+    private void checkStartDate(LocalDateTime eventDate) {
         log.debug("Проверка даты при СОЗДАНИИ");
 
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
@@ -321,7 +479,7 @@ public class EventServiceImpl implements EventService {
         log.debug("Проверка даты Event при ОБНОВЛЕНИИ");
 
         if (updDto.getEventDate() != null) {
-            this.startDateIsValid(updDto.getEventDate());
+            this.checkStartDate(updDto.getEventDate());
         }
     }
 
