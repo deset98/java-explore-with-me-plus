@@ -1,10 +1,10 @@
 package ru.practicum.ewm.client;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.ewm.NewHitDto;
@@ -14,14 +14,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-@RequiredArgsConstructor
+@Component
 public class StatsClient {
-    private final RestTemplate restTemplate;
-    @Value("${explore-with-me-server.url}")
-    private String serverUrl;
 
+    private final RestTemplate restTemplate;
+
+    private final String serverUrl;
+
+    public StatsClient(RestTemplate template, @Value("${explore-with-me-server.url}") String serverUrl) {
+        this.restTemplate = template;
+        this.serverUrl = serverUrl;
+
+        log.info("StatsClient инициализирован с сервером URL: {}", serverUrl);
+    }
 
     public void hit(NewHitDto newHitDto) {
+        log.debug("Метод hit(): {}", newHitDto);
+
         String url = serverUrl + "/hit";
         HttpEntity<NewHitDto> request = new HttpEntity<>(newHitDto, defaultHeaders());
 
@@ -39,6 +48,8 @@ public class StatsClient {
                                                             LocalDateTime end,
                                                             List<String> uris,
                                                             Boolean unique) {
+        log.debug("Метод getStats(): start={}, end={}, uris={}, unique={}", start, end, uris, unique);
+
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
                 .queryParam("start", start)
                 .queryParam("end", end);

@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
@@ -26,9 +27,9 @@ public interface EventService {
     List<EventFullDto> searchForAdmin(AdminEventSearchParams params);
 
     // Public API:
-    List<EventFullDto> getPublicEventsBy(UserEventSearchParams params);
+    EventFullDto getPublicBy(Long eventId, HttpServletRequest request);
 
-    EventFullDto getPublicById(Long eventId);
+    List<EventFullDto> getPublicBy(UserEventSearchParams params, HttpServletRequest request);
 
     List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId);
 

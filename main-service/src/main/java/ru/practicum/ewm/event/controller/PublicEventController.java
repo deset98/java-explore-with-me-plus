@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -20,42 +21,21 @@ public class PublicEventController {
 
     private final EventService eventService;
 
-//    private final StatsClient statsClient;
-
-    // обращение нужно записать в Stats
-    @GetMapping
-    public ResponseEntity<List<EventFullDto>> publicSearchMany(@Valid @ModelAttribute UserEventSearchParams params) {
-        log.debug("Метод publicSearchMany(); {}", params);
-
-        List<EventFullDto> events = eventService.getPublicEventsBy(params);
-        return ResponseEntity.ok(events);
-    }
-
-//        /////////////////////////////////////////
-//
-//        String clientIp = getClientIp(request);
-//        String timestamp = LocalDateTime.now().format(FORMATTER);
-//
-//        RequestHitDto endpointHitDto = RequestHitDto.builder()
-//                .app("events")
-//                .uri("/events/" + eventId)
-//                .ip(clientIp)
-//                .timestamp(timestamp)
-//                .build();
-//
-//        statsClient.hit(endpointHitDto);
-//
-//
-//
-//        /////////////////////////////////////////
-
-
-    // обращение нужно записать в Stats
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> publicSearchOne(@PathVariable @Positive Long eventId) {
+    public ResponseEntity<EventFullDto> publicSearchOne(@PathVariable @Positive Long eventId,
+                                                        HttpServletRequest request) {
         log.debug("Метод publicSearchOne(); eventId={}", eventId);
 
-        EventFullDto event = eventService.getPublicById(eventId);
+        EventFullDto event = eventService.getPublicBy(eventId, request);
         return ResponseEntity.ok(event);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<EventFullDto>> publicSearchMany(@Valid @ModelAttribute UserEventSearchParams params,
+                                                               HttpServletRequest request) {
+        log.debug("Метод publicSearchMany(); {}", params);
+
+        List<EventFullDto> events = eventService.getPublicBy(params, request);
+        return ResponseEntity.ok(events);
     }
 }

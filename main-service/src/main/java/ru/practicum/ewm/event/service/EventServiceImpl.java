@@ -2,6 +2,7 @@ package ru.practicum.ewm.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -214,65 +215,6 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
-//    @Override
-//    @Transactional
-//    public UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto) {
-//        log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
-//
-//        Event event = this.findEventBy(eventId);
-//        List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
-//
-//        UpdRequestsStatusResult result = new UpdRequestsStatusResult();
-//
-//
-//        if (event.getConfirmedRequests() == event.getParticipantLimit().longValue()) {
-//            throw new ConflictException("На Event id={} больше нет мест", eventId);
-//        }
-//
-//        switch (updDto.getStatus()) {
-//            case UpdRequestStatus.CONFIRMED -> {
-//                if (event.getParticipantLimit() == 0) {
-//                    List<ParticipationRequestDto> confirmed = processRequests(requests, RequestStatus.CONFIRMED);
-//                    result = UpdRequestsStatusResult.builder()
-//                            .confirmedRequests(confirmed)
-//                            .rejectedRequests(List.of())
-//                            .build();
-//                    event.setConfirmedRequests(event.getConfirmedRequests() + confirmed.size());
-//                    eventRepository.save(event);
-//                } else if (!event.getRequestModeration()) {
-//                    int limit = event.getParticipantLimit() - event.getConfirmedRequests().intValue();
-//                    if (requests.size() <= limit) {
-//                        List<ParticipationRequestDto> confirmed = processRequests(requests, RequestStatus.CONFIRMED);
-//                        result = UpdRequestsStatusResult.builder()
-//                                .confirmedRequests(processRequests(requests, RequestStatus.CONFIRMED))
-//                                .rejectedRequests(List.of())
-//                                .build();
-//                        event.setConfirmedRequests(event.getConfirmedRequests() + confirmed.size());
-//                        eventRepository.save(event);
-//                    } else {
-//                        limit = requests.size() - limit;
-//                        List<ParticipationRequestDto> confirmed =
-//                                processRequests(requests.subList(0, limit), RequestStatus.CONFIRMED);
-//                        List<ParticipationRequestDto> rejected =
-//                                processRequests(requests.subList(limit, requests.size()), RequestStatus.REJECTED);
-//                        result = UpdRequestsStatusResult.builder()
-//                                .confirmedRequests(confirmed)
-//                                .rejectedRequests(rejected)
-//                                .build();
-//                    }
-//                }
-//            }
-//            case UpdRequestStatus.REJECTED -> requests.forEach(request -> {
-//                switch (request.getStatus()) {
-//                    case RequestStatus.PENDING -> request.setStatus(RequestStatus.REJECTED);
-//                    case RequestStatus.CONFIRMED ->
-//                            throw new ConflictException("Нельзя отклонить подтвержденный Request");
-//                }
-//            });
-//        }
-//        return result;
-//    }
-
 
     // Admin API:
     @Override
@@ -363,9 +305,23 @@ public class EventServiceImpl implements EventService {
         return events.map(eventMapper::toFullDto).getContent();
     }
 
+
     // Public API:
     @Override
-    public List<EventFullDto> getPublicEventsBy(UserEventSearchParams params) {
+    public EventFullDto getPublicBy(Long eventId, HttpServletRequest request) {
+        log.debug("Метод getPublicById(); eventId={}", eventId);
+
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
+
+        event.setViews(event.getViews() + 1);
+        event = eventRepository.save(event);
+
+        return eventMapper.toFullDto(event);
+    }
+
+    @Override
+    public List<EventFullDto> getPublicBy(UserEventSearchParams params, HttpServletRequest request) {
         log.debug("Метод publicSearchMany; {}", params);
 
         QEvent event = QEvent.event;
@@ -426,18 +382,21 @@ public class EventServiceImpl implements EventService {
         return events.map(eventMapper::toFullDto).getContent();
     }
 
-    @Override
-    public EventFullDto getPublicById(Long eventId) {
-        log.debug("Метод getPublicById(); eventId={}", eventId);
 
-        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
-                .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
 
-        event.setViews(event.getViews() + 1);
-        event = eventRepository.save(event);
 
-        return eventMapper.toFullDto(event);
-    }
+//        String clientIp = getClientIp(request);
+//        String timestamp = LocalDateTime.now().format(FORMATTER);
+//
+//        RequestHitDto endpointHitDto = RequestHitDto.builder()
+//                .app("events")
+//                .uri("/events/" + eventId)
+//                .ip(clientIp)
+//                .timestamp(timestamp)
+//                .build();
+//
+//        statsClient.hit(endpointHitDto);
+
 
     private List<ParticipationRequestDto> processRequests(List<Request> requests, RequestStatus status) {
         return requests.stream()

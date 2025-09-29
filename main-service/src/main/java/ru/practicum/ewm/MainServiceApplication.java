@@ -7,12 +7,13 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 public class MainServiceApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(MainServiceApplication.class, args);
-    }
 
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(MainServiceApplication.class, args);
     }
 }

@@ -27,6 +27,7 @@ public class Compilation {
                     foreignKey = @ForeignKey(name = "fk_compilation_events__compilations")),
             inverseJoinColumns = @JoinColumn(name = "event_id",
                     foreignKey = @ForeignKey(name = "fk_compilation_events__events")))
+    @Builder.Default
     private List<Event> events = new ArrayList<>();
 
     @Column(nullable = false)

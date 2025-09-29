@@ -19,6 +19,7 @@ public interface HitMapper {
     @Mapping(target = "timestamp", expression = "java(toInstant(dto.getTimestamp()))")
     Hit toEntity(NewHitDto dto);
 
+    @Mapping(target = "hits", ignore = true)
     ResponseExtHitDto toExtResponseDto(Hit hit);
 
     ResponseShortHitDto toShortResponseDto(Hit hit);
