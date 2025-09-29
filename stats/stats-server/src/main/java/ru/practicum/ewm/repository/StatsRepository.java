@@ -3,7 +3,7 @@ package ru.practicum.ewm.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ru.practicum.ewm.ResponseExtHitDto;
+import ru.practicum.ewm.ResponseHitDto;
 import ru.practicum.ewm.entity.Hit;
 
 import java.time.Instant;
@@ -24,7 +24,7 @@ public interface StatsRepository extends JpaRepository<Hit, Long> {
                 ORDER BY
                     CASE WHEN :unique = true THEN COUNT(DISTINCT rh.ip) ELSE COUNT(rh.id) END DESC
             """)
-    List<ResponseExtHitDto> getStats(Instant start, Instant end, List<String> uris, boolean unique);
+    List<ResponseHitDto> getStats(Instant start, Instant end, List<String> uris, boolean unique);
 
     @Query("""
                 SELECT COUNT(h.id)

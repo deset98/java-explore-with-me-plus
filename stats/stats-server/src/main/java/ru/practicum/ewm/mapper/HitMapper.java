@@ -3,8 +3,7 @@ package ru.practicum.ewm.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.ResponseExtHitDto;
-import ru.practicum.ewm.ResponseShortHitDto;
+import ru.practicum.ewm.ResponseHitDto;
 import ru.practicum.ewm.entity.Hit;
 
 import java.time.Instant;
@@ -20,10 +19,7 @@ public interface HitMapper {
     Hit toEntity(NewHitDto dto);
 
     @Mapping(target = "hits", ignore = true)
-    ResponseExtHitDto toExtResponseDto(Hit hit);
-
-    ResponseShortHitDto toShortResponseDto(Hit hit);
-
+    ResponseHitDto toExtResponseDto(Hit hit);
 
     default Instant toInstant(LocalDateTime dateTime) {
         return dateTime != null ? dateTime.toInstant(ZoneOffset.UTC) : null;

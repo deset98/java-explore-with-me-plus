@@ -1,5 +1,6 @@
 package ru.practicum.ewm.client;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -8,9 +9,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.ResponseExtHitDto;
+import ru.practicum.ewm.ResponseHitDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -28,26 +30,36 @@ public class StatsClient {
         log.info("StatsClient инициализирован с сервером URL: {}", serverUrl);
     }
 
-    public void hit(NewHitDto newHitDto) {
-        log.debug("Метод hit(): {}", newHitDto);
+    public void hit(HttpServletRequest request) {
+        log.debug("Метод hit(): {}", request);
 
-        String url = serverUrl + "/hit";
-        HttpEntity<NewHitDto> request = new HttpEntity<>(newHitDto, defaultHeaders());
 
-        try {
-            restTemplate.postForEntity(url, request, NewHitDto.class);
-            log.info("Хит успешно создан: {}", newHitDto.getUri());
-//            return response;
-        } catch (Exception e) {
-            log.error("Ошибка при создании хита: {}", e.getMessage());
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info("sendData({})", request);
+        NewHitDto hitDto = NewHitDto.builder()
+                .app("event")
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("")))
+                .buil();
+
+
+//        String url = serverUrl + "/hit";
+//        HttpEntity<NewHitDto> request = new HttpEntity<>(newHitDto, defaultHeaders());
+//
+//        try {
+//            restTemplate.postForEntity(url, request, NewHitDto.class);
+//            log.info("Хит успешно создан: {}", newHitDto.getUri());
+////            return response;
+//        } catch (Exception e) {
+//            log.error("Ошибка при создании хита: {}", e.getMessage());
+//            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
     }
 
-    public ResponseEntity<List<ResponseExtHitDto>> getStats(LocalDateTime start,
-                                                            LocalDateTime end,
-                                                            List<String> uris,
-                                                            Boolean unique) {
+    public ResponseEntity<List<ResponseHitDto>> getStats(LocalDateTime start,
+                                                         LocalDateTime end,
+                                                         List<String> uris,
+                                                         Boolean unique) {
         log.debug("Метод getStats(): start={}, end={}, uris={}, unique={}", start, end, uris, unique);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
@@ -67,11 +79,11 @@ public class StatsClient {
         HttpEntity<Void> requestEntity = new HttpEntity<>(defaultHeaders());
 
         try {
-            ResponseEntity<List<ResponseExtHitDto>> response = restTemplate.exchange(
+            ResponseEntity<List<ResponseHitDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<List<ResponseExtHitDto>>() {
+                    new ParameterizedTypeReference<List<ResponseHitDto>>() {
                     }
             );
             log.info("Получена статистика: {}", response.getBody());

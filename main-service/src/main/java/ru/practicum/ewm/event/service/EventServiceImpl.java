@@ -11,8 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.NewHitDto;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
@@ -31,11 +33,13 @@ import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
 import static ru.practicum.ewm.event.model.EventState.CANCELED;
+import static ru.practicum.ewm.request.model.QRequest.request;
 
 @Slf4j
 @Service
@@ -50,6 +54,8 @@ public class EventServiceImpl implements EventService {
 
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
+
+    private final StatsClient statsClient;
 
     // Private API:
     @Override
@@ -317,6 +323,8 @@ public class EventServiceImpl implements EventService {
         event.setViews(event.getViews() + 1);
         event = eventRepository.save(event);
 
+        statsClient.hit(request);
+
         return eventMapper.toFullDto(event);
     }
 
@@ -379,23 +387,11 @@ public class EventServiceImpl implements EventService {
         }
 
         Page<Event> events = eventRepository.findAll(finalCondition, pageable);
+
+        statsClient.hit(request);
+
         return events.map(eventMapper::toFullDto).getContent();
     }
-
-
-
-
-//        String clientIp = getClientIp(request);
-//        String timestamp = LocalDateTime.now().format(FORMATTER);
-//
-//        RequestHitDto endpointHitDto = RequestHitDto.builder()
-//                .app("events")
-//                .uri("/events/" + eventId)
-//                .ip(clientIp)
-//                .timestamp(timestamp)
-//                .build();
-//
-//        statsClient.hit(endpointHitDto);
 
 
     private List<ParticipationRequestDto> processRequests(List<Request> requests, RequestStatus status) {

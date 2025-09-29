@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.NewHitDto;
 import ru.practicum.ewm.RequestStatsParams;
-import ru.practicum.ewm.ResponseExtHitDto;
-import ru.practicum.ewm.ResponseShortHitDto;
+import ru.practicum.ewm.ResponseHitDto;
 import ru.practicum.ewm.entity.Hit;
 import ru.practicum.ewm.mapper.HitMapper;
 import ru.practicum.ewm.repository.StatsRepository;
@@ -27,7 +26,7 @@ public class StatsServiceImpl implements StatsService {
     private final HitMapper hitMapper;
 
     @Override
-    public ResponseShortHitDto create(NewHitDto hitDto) {
+    public ResponseHitDto hit(NewHitDto hitDto) {
 
         Hit hit = hitMapper.toEntity(hitDto);
         hit = statsRepository.save(hit);
@@ -38,14 +37,14 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<ResponseExtHitDto> getStats(RequestStatsParams params) {
+    public List<ResponseHitDto> getStats(RequestStatsParams params) {
         log.debug("Метод getStats(); params={}", params);
 
         if (!params.getEnd().isAfter(params.getStart())) {
             throw new ValidationException("Дата конца не может быть раньше начала");
         }
 
-        List<ResponseExtHitDto> stats = statsRepository.getStats(
+        List<ResponseHitDto> stats = statsRepository.getStats(
                 params.getStart().toInstant(ZoneOffset.UTC),
                 params.getEnd().toInstant(ZoneOffset.UTC),
                 params.getUris(),

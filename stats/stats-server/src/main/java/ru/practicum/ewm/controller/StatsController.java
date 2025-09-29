@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.RequestStatsParams;
-import ru.practicum.ewm.ResponseExtHitDto;
+import ru.practicum.ewm.ResponseHitDto;
 import ru.practicum.ewm.service.StatsService;
 
 import java.util.List;
@@ -23,10 +23,10 @@ public class StatsController {
     private final StatsService statsService;
 
     @GetMapping
-    public ResponseEntity<List<ResponseExtHitDto>> getStats(@ModelAttribute @Valid RequestStatsParams params) {
+    public ResponseEntity<List<ResponseHitDto>> getStats(@ModelAttribute @Valid RequestStatsParams params) {
         log.info("Метод getStats(); params={}", params);
 
-        List<ResponseExtHitDto> result = statsService.getStats(params);
+        List<ResponseHitDto> result = statsService.getStats(params);
         return ResponseEntity.ok(result);
     }
 }

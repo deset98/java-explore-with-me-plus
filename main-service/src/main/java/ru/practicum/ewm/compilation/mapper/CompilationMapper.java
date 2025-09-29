@@ -23,7 +23,6 @@ public interface CompilationMapper {
     @Mapping(target = "events", ignore = true)
     Compilation updateFromDto(UpdateCompilationDto updDto, @MappingTarget Compilation compilation);
 
-//    @Mapping(target = "events", source = "events")
     CompilationDto toDto(Compilation compilation);
 
     List<EventShortDto> mapEvents(List<Event> events);
