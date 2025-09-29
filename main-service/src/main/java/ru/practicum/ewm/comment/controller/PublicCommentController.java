@@ -21,10 +21,11 @@ public class PublicCommentController {
 
     private final CommentService commentService;
 
-//    получить все комментарии по текущему событию
+    //    получить все комментарии по текущему событию
 //    возвращает коллекцию PublicDto
 //    @GetMapping
+    @GetMapping
     public List<CommentPublicDto> getComments(@PathVariable Long eventId) {
-        commentService.
+        return commentService.getPublicComments(eventId);
     }
 }
