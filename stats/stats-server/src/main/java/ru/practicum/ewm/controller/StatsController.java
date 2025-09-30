@@ -30,14 +30,3 @@ public class StatsController {
         return ResponseEntity.ok(result);
     }
 }
-
-
-//    @GetMapping
-//    public List<StatDto> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-//                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-//                                  @RequestParam(required = false) List<String> uris,
-//                                  @RequestParam(required = false, defaultValue = "false") Boolean unique,
-//                                  HttpServletRequest request) {
-//        log.info("Get stats from {}", uris);
-//        return service.getStats(start, end, request.getRequestURI(), uris, unique);
-//    }

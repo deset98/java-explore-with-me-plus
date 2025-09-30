@@ -25,11 +25,4 @@ public interface StatsRepository extends JpaRepository<Hit, Long> {
                     CASE WHEN :unique = true THEN COUNT(DISTINCT rh.ip) ELSE COUNT(rh.id) END DESC
             """)
     List<ResponseHitDto> getStats(Instant start, Instant end, List<String> uris, boolean unique);
-
-    @Query("""
-                SELECT COUNT(h.id)
-                FROM Hit h
-                WHERE h.timestamp BETWEEN :start AND :end
-            """)
-    Long countHits(Instant start, Instant end);
 }

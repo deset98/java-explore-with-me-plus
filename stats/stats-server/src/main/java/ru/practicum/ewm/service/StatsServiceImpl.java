@@ -1,6 +1,5 @@
 package ru.practicum.ewm.service;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,6 +8,7 @@ import ru.practicum.ewm.NewHitDto;
 import ru.practicum.ewm.RequestStatsParams;
 import ru.practicum.ewm.ResponseHitDto;
 import ru.practicum.ewm.entity.Hit;
+import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.mapper.HitMapper;
 import ru.practicum.ewm.repository.StatsRepository;
 
@@ -41,7 +41,7 @@ public class StatsServiceImpl implements StatsService {
         log.debug("Метод getStats(); params={}", params);
 
         if (!params.getEnd().isAfter(params.getStart())) {
-            throw new ValidationException("Дата конца не может быть раньше начала");
+            throw new BadRequestException("Дата конца не может быть раньше начала");
         }
 
         List<ResponseHitDto> stats = statsRepository.getStats(

@@ -1,6 +1,6 @@
 package ru.practicum.ewm.exception;
 
-public class ConflictException extends ApiException {
+public class ConflictException extends ApiError {
 
     public ConflictException(String message) {
         super(message);

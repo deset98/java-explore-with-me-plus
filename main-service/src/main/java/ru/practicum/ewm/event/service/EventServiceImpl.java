@@ -151,7 +151,6 @@ public class EventServiceImpl implements EventService {
         log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
 
 
-
         Event event = this.findEventBy(eventId);
         List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
 

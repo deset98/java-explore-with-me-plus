@@ -1,13 +1,12 @@
 package ru.practicum.ewm.entity;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "endpoint_hit")
+@Table(name = "hits")
 @Getter
 @Setter
 @ToString

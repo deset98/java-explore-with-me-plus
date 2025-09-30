@@ -1,6 +1,6 @@
 package ru.practicum.ewm.exception;
 
-public class NotFoundException extends ApiException {
+public class NotFoundException extends ApiError {
 
     public NotFoundException(String message) {
         super(message);

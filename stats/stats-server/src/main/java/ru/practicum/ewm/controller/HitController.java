@@ -26,7 +26,7 @@ public class HitController {
 
     @PostMapping
     public ResponseEntity<ResponseHitDto> createHit(@Valid @RequestBody NewHitDto newHitDto) {
-        log.info("Create hit: {}", newHitDto);
+        log.info("Метод createHit hit: {}", newHitDto);
 
         ResponseHitDto result = service.hit(newHitDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
