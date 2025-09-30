@@ -13,7 +13,7 @@ import java.util.List;
 public interface StatsRepository extends JpaRepository<Hit, Long> {
 
     @Query("""
-                SELECT new ru.practicum.ewm.ResponseExtHitDto(
+                SELECT new ru.practicum.ewm.ResponseHitDto(
                     rh.app,
                     rh.uri,
                     CASE WHEN :unique = true THEN COUNT(DISTINCT rh.ip) ELSE COUNT(rh.id) END)

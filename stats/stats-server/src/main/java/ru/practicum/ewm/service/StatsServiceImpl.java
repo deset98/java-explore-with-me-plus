@@ -33,7 +33,7 @@ public class StatsServiceImpl implements StatsService {
 
         log.debug("Сохранен хит  {}", hit);
 
-        return hitMapper.toShortResponseDto(hit);
+        return hitMapper.toResponseDto(hit);
     }
 
     @Override

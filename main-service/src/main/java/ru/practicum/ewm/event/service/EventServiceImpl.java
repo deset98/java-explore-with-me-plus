@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.NewHitDto;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
@@ -33,13 +32,11 @@ import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
 import static ru.practicum.ewm.event.model.EventState.CANCELED;
-import static ru.practicum.ewm.request.model.QRequest.request;
 
 @Slf4j
 @Service

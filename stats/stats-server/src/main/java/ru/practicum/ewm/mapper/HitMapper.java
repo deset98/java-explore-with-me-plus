@@ -19,7 +19,7 @@ public interface HitMapper {
     Hit toEntity(NewHitDto dto);
 
     @Mapping(target = "hits", ignore = true)
-    ResponseHitDto toExtResponseDto(Hit hit);
+    ResponseHitDto toResponseDto(Hit hit);
 
     default Instant toInstant(LocalDateTime dateTime) {
         return dateTime != null ? dateTime.toInstant(ZoneOffset.UTC) : null;
