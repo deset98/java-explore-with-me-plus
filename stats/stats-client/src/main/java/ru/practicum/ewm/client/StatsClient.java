@@ -20,7 +20,6 @@ public class StatsClient {
     @Value("${explore-with-me-server.url}")
     private String serverUrl;
 
-
     public void hit(NewHitDto newHitDto) {
         String url = serverUrl + "/hit";
         HttpEntity<NewHitDto> request = new HttpEntity<>(newHitDto, defaultHeaders());
@@ -28,7 +27,6 @@ public class StatsClient {
         try {
             restTemplate.postForEntity(url, request, NewHitDto.class);
             log.info("Хит успешно создан: {}", newHitDto.getUri());
-//            return response;
         } catch (Exception e) {
             log.error("Ошибка при создании хита: {}", e.getMessage());
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

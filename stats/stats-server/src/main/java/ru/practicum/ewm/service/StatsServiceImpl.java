@@ -1,12 +1,10 @@
 package ru.practicum.ewm.service;
 
-import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import ru.practicum.ewm.NewHitDto;
 import ru.practicum.ewm.RequestStatsParams;
 import ru.practicum.ewm.ResponseExtHitDto;

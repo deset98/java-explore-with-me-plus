@@ -3,10 +3,11 @@ package ru.practicum.ewm.comment.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.comment.dto.CommentFullDto;
 import ru.practicum.ewm.comment.service.CommentService;
+
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -22,11 +23,10 @@ public class PrivateCommentController {
 //    @PostMapping
 
 
-
-//    получить все комментарии текущего пользователя по текущему событию
-//    возвращает коллекцию FullDto
-//    @GetMapping
-
+    @GetMapping
+    public List<CommentFullDto> getCommentsByUserId(@PathVariable Long userId, @PathVariable Long eventId) {
+        return serviceService.getUserCommentsForEvent(userId, eventId);
+    }
 
 
 //    удалить комментарий
