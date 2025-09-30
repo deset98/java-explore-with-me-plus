@@ -26,5 +26,6 @@ public class RequestStatsParams {
 
     private List<String> uris;
 
+    @Builder.Default
     private boolean unique = false;
 }
