@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.RequestStatsParams;
+import ru.practicum.ewm.ReqStatsParams;
 import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.entity.Hit;
 import ru.practicum.ewm.exception.BadRequestException;
@@ -36,7 +36,7 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<StatsDto> getStats(RequestStatsParams params) {
+    public List<StatsDto> getStats(ReqStatsParams params) {
         log.debug("Метод getStats(); params={}", params);
 
         if (!params.getEnd().isAfter(params.getStart())) {

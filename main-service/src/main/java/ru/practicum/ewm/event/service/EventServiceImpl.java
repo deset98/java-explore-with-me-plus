@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.ReqStatsParams;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
@@ -316,10 +318,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
 
-        event.setViews(event.getViews() + 1);
-        event = eventRepository.save(event);
-
         statsClient.hit(request);
+        this.setViewsForEvent(event);
 
         return eventMapper.toFullDto(event);
     }
@@ -439,5 +439,16 @@ public class EventServiceImpl implements EventService {
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ConflictException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
         }
+    }
+
+    private void setViewsForEvent(Event event) {
+        List<StatsDto> stats = statsClient.getStats(ReqStatsParams.builder()
+                .start(LocalDateTime.now().minusYears(100))
+                .end(LocalDateTime.now().plusYears(1))
+                .uris(List.of("/events/" + event.getId()))
+                .unique(true)
+                .build());
+
+        event.setViews(stats.getFirst().getHits());
     }
 }

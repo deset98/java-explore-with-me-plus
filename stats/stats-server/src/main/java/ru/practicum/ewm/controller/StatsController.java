@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.ewm.RequestStatsParams;
+import ru.practicum.ewm.ReqStatsParams;
 import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.service.StatsService;
 
@@ -23,7 +23,7 @@ public class StatsController {
     private final StatsService statsService;
 
     @GetMapping
-    public ResponseEntity<List<StatsDto>> getStats(@ModelAttribute @Valid RequestStatsParams params) {
+    public ResponseEntity<List<StatsDto>> getStats(@ModelAttribute @Valid ReqStatsParams params) {
         log.info("Метод getStats(); params={}", params);
 
         List<StatsDto> result = statsService.getStats(params);

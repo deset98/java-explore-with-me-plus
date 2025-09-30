@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.ewm.NewHitDto;
+import ru.practicum.ewm.ReqStatsParams;
 import ru.practicum.ewm.StatsDto;
 
 import java.net.URI;
@@ -51,26 +52,24 @@ public class StatsClient {
         }
     }
 
-    public ResponseEntity<List<StatsDto>> getStats(LocalDateTime start,
-                                                   LocalDateTime end,
-                                                   List<String> uris,
-                                                   Boolean unique) {
-        log.debug("Метод getStats(): start={}, end={}, uris={}, unique={}", start, end, uris, unique);
+    public List<StatsDto> getStats(ReqStatsParams params) {
+        log.debug("Метод getStats(): start={}, end={}, uris={}, unique={}",
+                params.getStart(), params.getEnd(), params.getUris(), params.isUnique());
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
-                .queryParam("start", start)
-                .queryParam("end", end);
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
+                    .queryParam("start", params.getStart())
+                    .queryParam("end", params.getEnd());
 
-        if (uris != null && !uris.isEmpty()) {
-            builder.queryParam("uris", String.join(",", uris));
-        }
-        builder.queryParam("unique", unique);
+            if (params.getUris() != null && !params.getUris().isEmpty()) {
+                builder.queryParam("uris", String.join(",", params.getUris()));
+            }
 
-        String url = builder.build().encode().toUriString();
+            builder.queryParam("unique", params.isUnique());
 
-        HttpEntity<Void> requestEntity = new HttpEntity<>(defaultHeaders());
+            URI url = builder.build().toUri();
 
-        try {
+            HttpEntity<Void> requestEntity = new HttpEntity<>(defaultHeaders());
+
             ResponseEntity<List<StatsDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -78,12 +77,10 @@ public class StatsClient {
                     new ParameterizedTypeReference<List<StatsDto>>() {
                     }
             );
+
             log.info("Получена статистика: {}", response.getBody());
-            return response;
-        } catch (Exception e) {
-            log.error("Ошибка при получении статистики: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+
+            return response.getBody();
     }
 
     private HttpHeaders defaultHeaders() {

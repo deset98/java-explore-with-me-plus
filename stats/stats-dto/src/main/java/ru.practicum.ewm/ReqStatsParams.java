@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestStatsParams {
+public class ReqStatsParams {
 
     @NotNull(message = "Дата и время начала диапазона не может быть пустым")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
