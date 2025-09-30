@@ -2,6 +2,7 @@ package ru.practicum.ewm.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -10,8 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.ReqStatsParams;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
@@ -49,6 +53,8 @@ public class EventServiceImpl implements EventService {
 
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
+
+    private final StatsClient statsClient;
 
     // Private API:
     @Override
@@ -147,7 +153,6 @@ public class EventServiceImpl implements EventService {
         log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
 
 
-
         Event event = this.findEventBy(eventId);
         List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
 
@@ -213,65 +218,6 @@ public class EventServiceImpl implements EventService {
 
         return result;
     }
-
-//    @Override
-//    @Transactional
-//    public UpdRequestsStatusResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updDto) {
-//        log.debug("Метод updateRequests(), userId={}, eventId={}", userId, eventId);
-//
-//        Event event = this.findEventBy(eventId);
-//        List<Request> requests = requestRepository.findAllByIdIn(updDto.getRequestIds());
-//
-//        UpdRequestsStatusResult result = new UpdRequestsStatusResult();
-//
-//
-//        if (event.getConfirmedRequests() == event.getParticipantLimit().longValue()) {
-//            throw new ConflictException("На Event id={} больше нет мест", eventId);
-//        }
-//
-//        switch (updDto.getStatus()) {
-//            case UpdRequestStatus.CONFIRMED -> {
-//                if (event.getParticipantLimit() == 0) {
-//                    List<ParticipationRequestDto> confirmed = processRequests(requests, RequestStatus.CONFIRMED);
-//                    result = UpdRequestsStatusResult.builder()
-//                            .confirmedRequests(confirmed)
-//                            .rejectedRequests(List.of())
-//                            .build();
-//                    event.setConfirmedRequests(event.getConfirmedRequests() + confirmed.size());
-//                    eventRepository.save(event);
-//                } else if (!event.getRequestModeration()) {
-//                    int limit = event.getParticipantLimit() - event.getConfirmedRequests().intValue();
-//                    if (requests.size() <= limit) {
-//                        List<ParticipationRequestDto> confirmed = processRequests(requests, RequestStatus.CONFIRMED);
-//                        result = UpdRequestsStatusResult.builder()
-//                                .confirmedRequests(processRequests(requests, RequestStatus.CONFIRMED))
-//                                .rejectedRequests(List.of())
-//                                .build();
-//                        event.setConfirmedRequests(event.getConfirmedRequests() + confirmed.size());
-//                        eventRepository.save(event);
-//                    } else {
-//                        limit = requests.size() - limit;
-//                        List<ParticipationRequestDto> confirmed =
-//                                processRequests(requests.subList(0, limit), RequestStatus.CONFIRMED);
-//                        List<ParticipationRequestDto> rejected =
-//                                processRequests(requests.subList(limit, requests.size()), RequestStatus.REJECTED);
-//                        result = UpdRequestsStatusResult.builder()
-//                                .confirmedRequests(confirmed)
-//                                .rejectedRequests(rejected)
-//                                .build();
-//                    }
-//                }
-//            }
-//            case UpdRequestStatus.REJECTED -> requests.forEach(request -> {
-//                switch (request.getStatus()) {
-//                    case RequestStatus.PENDING -> request.setStatus(RequestStatus.REJECTED);
-//                    case RequestStatus.CONFIRMED ->
-//                            throw new ConflictException("Нельзя отклонить подтвержденный Request");
-//                }
-//            });
-//        }
-//        return result;
-//    }
 
 
     // Admin API:
@@ -363,9 +309,23 @@ public class EventServiceImpl implements EventService {
         return events.map(eventMapper::toFullDto).getContent();
     }
 
+
     // Public API:
     @Override
-    public List<EventFullDto> getPublicEventsBy(UserEventSearchParams params) {
+    public EventFullDto getPublicBy(Long eventId, HttpServletRequest request) {
+        log.debug("Метод getPublicById(); eventId={}", eventId);
+
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
+
+        statsClient.hit(request);
+        this.setViewsForEvent(event);
+
+        return eventMapper.toFullDto(event);
+    }
+
+    @Override
+    public List<EventFullDto> getPublicBy(UserEventSearchParams params, HttpServletRequest request) {
         log.debug("Метод publicSearchMany; {}", params);
 
         QEvent event = QEvent.event;
@@ -423,21 +383,12 @@ public class EventServiceImpl implements EventService {
         }
 
         Page<Event> events = eventRepository.findAll(finalCondition, pageable);
+
+        statsClient.hit(request);
+
         return events.map(eventMapper::toFullDto).getContent();
     }
 
-    @Override
-    public EventFullDto getPublicById(Long eventId) {
-        log.debug("Метод getPublicById(); eventId={}", eventId);
-
-        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
-                .orElseThrow(() -> new NotFoundException("Опубликованного Event id={} нет", eventId));
-
-        event.setViews(event.getViews() + 1);
-        event = eventRepository.save(event);
-
-        return eventMapper.toFullDto(event);
-    }
 
     private List<ParticipationRequestDto> processRequests(List<Request> requests, RequestStatus status) {
         return requests.stream()
@@ -488,5 +439,16 @@ public class EventServiceImpl implements EventService {
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ConflictException("Дата Event при ПУБЛИКАЦИИ должна быть в будущем, мин. через 1 час");
         }
+    }
+
+    private void setViewsForEvent(Event event) {
+        List<StatsDto> stats = statsClient.getStats(ReqStatsParams.builder()
+                .start(LocalDateTime.now().minusYears(100))
+                .end(LocalDateTime.now().plusYears(1))
+                .uris(List.of("/events/" + event.getId()))
+                .unique(true)
+                .build());
+
+        event.setViews(stats.getFirst().getHits());
     }
 }

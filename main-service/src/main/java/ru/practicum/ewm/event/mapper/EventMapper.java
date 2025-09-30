@@ -79,5 +79,4 @@ public interface EventMapper {
     default Instant toInstantForUpdate(LocalDateTime newDateTime, Instant currentValue) {
         return newDateTime != null ? newDateTime.toInstant(ZoneOffset.UTC) : currentValue;
     }
-
 }

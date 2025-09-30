@@ -1,21 +1,17 @@
 package ru.practicum.ewm.service;
 
-import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.RequestStatsParams;
-import ru.practicum.ewm.ResponseExtHitDto;
-import ru.practicum.ewm.ResponseShortHitDto;
+import ru.practicum.ewm.ReqStatsParams;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.entity.Hit;
+import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.mapper.HitMapper;
 import ru.practicum.ewm.repository.StatsRepository;
 
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -29,30 +25,26 @@ public class StatsServiceImpl implements StatsService {
     private final HitMapper hitMapper;
 
     @Override
-    public ResponseShortHitDto create(NewHitDto hitDto) {
+    public StatsDto hit(NewHitDto hitDto) {
 
         Hit hit = hitMapper.toEntity(hitDto);
         hit = statsRepository.save(hit);
 
         log.debug("Сохранен хит  {}", hit);
 
-        return hitMapper.toShortResponseDto(hit);
+        return hitMapper.toStatsDto(hit);
     }
 
     @Override
-    public List<ResponseExtHitDto> getStats(RequestStatsParams params) {
+    public List<StatsDto> getStats(ReqStatsParams params) {
         log.debug("Метод getStats(); params={}", params);
 
         if (!params.getEnd().isAfter(params.getStart())) {
-            throw new ValidationException("Дата конца не может быть раньше начала");
+            throw new BadRequestException("Дата конца не может быть раньше начала");
         }
 
-        List<ResponseExtHitDto> stats = statsRepository.getStats(
-                params.getStart().toInstant(ZoneOffset.UTC),
-                params.getEnd().toInstant(ZoneOffset.UTC),
-                params.getUris(),
-                params.isUnique());
-
-        return stats;
+        return params.isUnique()
+                ? statsRepository.findStatsWithUniqueIp(params.getStart(), params.getEnd(), params.getUris())
+                : statsRepository.getAllStats(params.getStart(), params.getEnd(), params.getUris());
     }
 }

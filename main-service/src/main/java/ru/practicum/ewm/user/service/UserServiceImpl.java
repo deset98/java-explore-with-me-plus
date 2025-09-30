@@ -47,15 +47,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findBy(Long userId) {
-        log.debug("Метод findBy(); userId={}", userId);
-
-        User user = this.findUserBy(userId);
-
-        return userMapper.toFullDto(user);
-    }
-
-    @Override
     public List<UserDto> findAllBy(List<Long> ids, Integer from, Integer size) {
         log.debug("Метод findAll(); ids={}, from={}, size={}", ids, from, size);
 
@@ -84,10 +75,5 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new NotFoundException("User userId={} не найден", userId);
         }
-    }
-
-
-    private User findUserBy(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User id={} не найден", userId));
     }
 }

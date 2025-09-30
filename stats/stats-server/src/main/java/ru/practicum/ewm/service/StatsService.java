@@ -1,15 +1,14 @@
 package ru.practicum.ewm.service;
 
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.RequestStatsParams;
-import ru.practicum.ewm.ResponseExtHitDto;
-import ru.practicum.ewm.ResponseShortHitDto;
+import ru.practicum.ewm.ReqStatsParams;
+import ru.practicum.ewm.StatsDto;
 
 import java.util.List;
 
 public interface StatsService {
 
-    ResponseShortHitDto create(NewHitDto hitDto);
+    StatsDto hit(NewHitDto hitDto);
 
-    List<ResponseExtHitDto> getStats(RequestStatsParams statsDto);
+    List<StatsDto> getStats(ReqStatsParams statsDto);
 }

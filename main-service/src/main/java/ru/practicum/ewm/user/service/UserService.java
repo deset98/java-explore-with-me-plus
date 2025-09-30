@@ -9,8 +9,6 @@ public interface UserService {
 
     List<UserDto> findAllBy(List<Long> ids, Integer from, Integer size);
 
-    UserDto findBy(Long userId);
-
     UserDto add(NewUserRequest newDto);
 
     void delete(Long userId);

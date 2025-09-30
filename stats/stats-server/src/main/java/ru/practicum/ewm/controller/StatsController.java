@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.ewm.RequestStatsParams;
-import ru.practicum.ewm.ResponseExtHitDto;
+import ru.practicum.ewm.ReqStatsParams;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.service.StatsService;
 
 import java.util.List;
@@ -23,21 +23,10 @@ public class StatsController {
     private final StatsService statsService;
 
     @GetMapping
-    public ResponseEntity<List<ResponseExtHitDto>> getStats(@ModelAttribute @Valid RequestStatsParams params) {
+    public ResponseEntity<List<StatsDto>> getStats(@ModelAttribute @Valid ReqStatsParams params) {
         log.info("Метод getStats(); params={}", params);
 
-        List<ResponseExtHitDto> result = statsService.getStats(params);
+        List<StatsDto> result = statsService.getStats(params);
         return ResponseEntity.ok(result);
     }
 }
-
-
-//    @GetMapping
-//    public List<StatDto> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-//                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-//                                  @RequestParam(required = false) List<String> uris,
-//                                  @RequestParam(required = false, defaultValue = "false") Boolean unique,
-//                                  HttpServletRequest request) {
-//        log.info("Get stats from {}", uris);
-//        return service.getStats(start, end, request.getRequestURI(), uris, unique);
-//    }

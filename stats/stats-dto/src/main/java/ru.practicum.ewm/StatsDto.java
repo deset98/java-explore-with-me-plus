@@ -1,15 +1,15 @@
 package ru.practicum.ewm;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseExtHitDto extends ResponseShortHitDto {
+public class StatsDto {
 
     private String app;
 
