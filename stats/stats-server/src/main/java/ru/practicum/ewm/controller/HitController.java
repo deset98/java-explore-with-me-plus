@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.ResponseHitDto;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.service.StatsService;
 import ru.practicum.ewm.service.StatsServiceImpl;
 
@@ -25,10 +25,10 @@ public class HitController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseHitDto> createHit(@Valid @RequestBody NewHitDto newHitDto) {
+    public ResponseEntity<StatsDto> createHit(@Valid @RequestBody NewHitDto newHitDto) {
         log.info("Метод createHit hit: {}", newHitDto);
 
-        ResponseHitDto result = service.hit(newHitDto);
+        StatsDto result = service.hit(newHitDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }

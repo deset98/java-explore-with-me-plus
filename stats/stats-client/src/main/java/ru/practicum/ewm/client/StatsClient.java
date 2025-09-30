@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.ResponseHitDto;
+import ru.practicum.ewm.StatsDto;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -51,10 +51,10 @@ public class StatsClient {
         }
     }
 
-    public ResponseEntity<List<ResponseHitDto>> getStats(LocalDateTime start,
-                                                         LocalDateTime end,
-                                                         List<String> uris,
-                                                         Boolean unique) {
+    public ResponseEntity<List<StatsDto>> getStats(LocalDateTime start,
+                                                   LocalDateTime end,
+                                                   List<String> uris,
+                                                   Boolean unique) {
         log.debug("Метод getStats(): start={}, end={}, uris={}, unique={}", start, end, uris, unique);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
@@ -74,11 +74,11 @@ public class StatsClient {
         HttpEntity<Void> requestEntity = new HttpEntity<>(defaultHeaders());
 
         try {
-            ResponseEntity<List<ResponseHitDto>> response = restTemplate.exchange(
+            ResponseEntity<List<StatsDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<List<ResponseHitDto>>() {
+                    new ParameterizedTypeReference<List<StatsDto>>() {
                     }
             );
             log.info("Получена статистика: {}", response.getBody());

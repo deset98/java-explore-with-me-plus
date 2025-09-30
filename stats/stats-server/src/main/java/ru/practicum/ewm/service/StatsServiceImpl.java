@@ -6,13 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.NewHitDto;
 import ru.practicum.ewm.RequestStatsParams;
-import ru.practicum.ewm.ResponseHitDto;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.entity.Hit;
 import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.mapper.HitMapper;
 import ru.practicum.ewm.repository.StatsRepository;
 
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -26,29 +25,28 @@ public class StatsServiceImpl implements StatsService {
     private final HitMapper hitMapper;
 
     @Override
-    public ResponseHitDto hit(NewHitDto hitDto) {
+    public StatsDto hit(NewHitDto hitDto) {
 
         Hit hit = hitMapper.toEntity(hitDto);
         hit = statsRepository.save(hit);
 
         log.debug("Сохранен хит  {}", hit);
 
-        return hitMapper.toResponseDto(hit);
+        return hitMapper.toStatsDto(hit);
     }
 
     @Override
-    public List<ResponseHitDto> getStats(RequestStatsParams params) {
+    public List<StatsDto> getStats(RequestStatsParams params) {
         log.debug("Метод getStats(); params={}", params);
 
         if (!params.getEnd().isAfter(params.getStart())) {
             throw new BadRequestException("Дата конца не может быть раньше начала");
         }
 
-        List<ResponseHitDto> stats = statsRepository.getStats(
-                params.getStart().toInstant(ZoneOffset.UTC),
-                params.getEnd().toInstant(ZoneOffset.UTC),
-                params.getUris(),
-                params.isUnique());
+        List<StatsDto> stats = params.isUnique()
+                ? statsRepository.findStatsWithUniqueIp(params.getStart(), params.getEnd(), params.getUris())
+                : statsRepository.getAllStats(params.getStart(), params.getEnd(), params.getUris());
+
 
         return stats;
     }

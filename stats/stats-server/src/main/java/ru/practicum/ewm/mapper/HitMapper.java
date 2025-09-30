@@ -3,25 +3,16 @@ package ru.practicum.ewm.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.ewm.NewHitDto;
-import ru.practicum.ewm.ResponseHitDto;
+import ru.practicum.ewm.StatsDto;
 import ru.practicum.ewm.entity.Hit;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Mapper(componentModel = "spring")
 public interface HitMapper {
 
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "timestamp", expression = "java(toInstant(dto.getTimestamp()))")
     Hit toEntity(NewHitDto dto);
 
     @Mapping(target = "hits", ignore = true)
-    ResponseHitDto toResponseDto(Hit hit);
-
-    default Instant toInstant(LocalDateTime dateTime) {
-        return dateTime != null ? dateTime.toInstant(ZoneOffset.UTC) : null;
-    }
+    StatsDto toStatsDto(Hit hit);
 }
