@@ -43,11 +43,8 @@ public class StatsServiceImpl implements StatsService {
             throw new BadRequestException("Дата конца не может быть раньше начала");
         }
 
-        List<StatsDto> stats = params.isUnique()
+        return params.isUnique()
                 ? statsRepository.findStatsWithUniqueIp(params.getStart(), params.getEnd(), params.getUris())
                 : statsRepository.getAllStats(params.getStart(), params.getEnd(), params.getUris());
-
-
-        return stats;
     }
 }
