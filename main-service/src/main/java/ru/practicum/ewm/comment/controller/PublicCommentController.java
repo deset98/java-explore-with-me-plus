@@ -2,6 +2,7 @@ package ru.practicum.ewm.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,11 +22,12 @@ public class PublicCommentController {
 
     private final CommentService commentService;
 
-    //    получить все комментарии по текущему событию
-//    возвращает коллекцию PublicDto
-//    @GetMapping
+
     @GetMapping
-    public List<CommentPublicDto> getComments(@PathVariable Long eventId) {
-        return commentService.getPublicComments(eventId);
+    public ResponseEntity<List<CommentPublicDto>> getComments(@PathVariable Long eventId) {
+        log.info("Метод getComments(); eventId={}", eventId);
+
+        List<CommentPublicDto> result = commentService.getAllBy(eventId);
+        return ResponseEntity.ok(result);
     }
 }

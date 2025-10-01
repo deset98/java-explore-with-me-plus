@@ -7,7 +7,8 @@ import ru.practicum.ewm.comment.dto.NewCommentDto;
 import java.util.List;
 
 public interface CommentService {
-    List<CommentPublicDto> getPublicComments(Long eventId);
 
-    CommentFullDto addComment(NewCommentDto dto, Long eventId, Long userId);
+    List<CommentPublicDto> getAllBy(Long eventId);
+
+    CommentFullDto add(NewCommentDto dto, Long eventId, Long userId);
 }

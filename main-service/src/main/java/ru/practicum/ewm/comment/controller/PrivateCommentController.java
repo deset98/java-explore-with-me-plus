@@ -3,6 +3,8 @@ package ru.practicum.ewm.comment.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.CommentFullDto;
@@ -18,12 +20,14 @@ public class PrivateCommentController {
 
     private final CommentService commentService;
 
-    //    создать комментарий
-//    возвращает FullDto
-//    @PostMapping
     @PostMapping
-    public CommentFullDto addComment(@Valid @RequestBody NewCommentDto dto, @PathVariable Long eventId, @PathVariable Long userId) {
-        return commentService.addComment(dto, eventId, userId);
+    public ResponseEntity<CommentFullDto> addComment(@RequestBody @Valid NewCommentDto dto,
+                                                     @PathVariable Long eventId,
+                                                     @PathVariable Long userId) {
+        log.info("Метод addComment(); even");
+
+        CommentFullDto result = commentService.add(dto, eventId, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
 
