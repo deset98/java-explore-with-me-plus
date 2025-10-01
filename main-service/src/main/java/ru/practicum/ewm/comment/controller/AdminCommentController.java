@@ -2,6 +2,7 @@ package ru.practicum.ewm.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.CommentPublicDto;
@@ -17,8 +18,12 @@ public class AdminCommentController {
     private final CommentService serviceService;
 
     @PatchMapping
-    public CommentPublicDto patchComment(@PathVariable Long eventId, @PathVariable Long commentId) {
-        return serviceService.cancelComment(eventId, commentId);
+    public ResponseEntity<CommentPublicDto> patchComment(@PathVariable Long eventId,
+                                                         @PathVariable Long commentId) {
+        log.info("Метод patchComment(); eventId={}, commentId={}", eventId, commentId);
+
+        CommentPublicDto result = serviceService.cancelComment(eventId, commentId);
+        return ResponseEntity.ok(result);
     }
 
 //    сделать комментарий непубличным (установить статус HIDE)

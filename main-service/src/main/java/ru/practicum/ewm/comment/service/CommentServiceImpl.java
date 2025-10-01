@@ -29,25 +29,29 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentPublicDto cancelComment(Long eventId, Long commentId) {
-       eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие не найдено"));
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий не найден"));
+        log.info("Метод cancelComment(); eventId={}; commentId={}", eventId, commentId);
 
-        if (!comment.getEvent().getId().equals(eventId)) {
-            throw new ConflictException("Комментарий не принадлежит указанному событию");
+        if (!commentRepository.existsByIdAndEventId(commentId, eventId)) {
+            throw new ConflictException("Комментарий не принадлежит указанному событию; eventId={}; commentId={}",
+                    eventId, commentId);
         }
 
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment id={} не найден", commentId));
         comment.setState(CommentState.HIDE);
-        Comment updatedComment = commentRepository.save(comment);
+        comment = commentRepository.save(comment);
 
-        return commentMapper.toPublicDto(updatedComment);
+        return commentMapper.toPublicDto(comment);
     }
 
     @Override
     public List<CommentFullDto> getUserCommentsForEvent(Long userId, Long eventId) {
+        log.info("Метод getUserCommentsForEvent(); eventId={}; commentId={}", userId, eventId);
+
         List<Comment> comments = commentRepository.findAllByEventIdAndAuthorId(eventId, userId);
 
-        return comments.stream().map(commentMapper::toFullDto).toList();
+        return comments.stream()
+                .map(commentMapper::toFullDto)
+                .toList();
     }
 }

@@ -2,6 +2,7 @@ package ru.practicum.ewm.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.CommentFullDto;
@@ -24,8 +25,12 @@ public class PrivateCommentController {
 
 
     @GetMapping
-    public List<CommentFullDto> getCommentsByUserId(@PathVariable Long userId, @PathVariable Long eventId) {
-        return serviceService.getUserCommentsForEvent(userId, eventId);
+    public ResponseEntity<List<CommentFullDto>> getCommentsByUserId(@PathVariable Long userId,
+                                                                    @PathVariable Long eventId) {
+        log.info("Метод getCommentsByUserId(); userId={} eventId={}", userId, eventId);
+
+        List<CommentFullDto> result = serviceService.getUserCommentsForEvent(userId, eventId);
+        return ResponseEntity.ok(result);
     }
 
 
