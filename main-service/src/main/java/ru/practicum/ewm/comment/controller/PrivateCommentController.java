@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.category.dto.CategoryRequestDto;
 import ru.practicum.ewm.comment.dto.CommentFullDto;
 import ru.practicum.ewm.comment.dto.UpdCommentDto;
 import ru.practicum.ewm.comment.service.CommentService;
@@ -27,36 +25,34 @@ public class PrivateCommentController {
 //    @PostMapping
 
 
-
 //    получить все комментарии текущего пользователя по текущему событию
 //    возвращает коллекцию FullDto
 //    @GetMapping
 
 
-
-//    удалить комментарий
-//    @DeleteMapping("/{commentId}")
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@PathVariable Long userId, @PathVariable Long eventId, @PathVariable Long commentId) {
-        log.debug("Метод deleteComment(); userId={}, eventId={}, commentId={}", userId, eventId, commentId);
+    public void deleteComment(@PathVariable Long userId,
+                              @PathVariable Long eventId,
+                              @PathVariable Long commentId) {
+        log.info("Метод deleteComment(); userId={}, eventId={}, commentId={}", userId, eventId, commentId);
 
         serviceService.delete(userId, commentId);
     }
 
-//    изменить комментарий
+    //    изменить комментарий
 //    возвращает FullDto
 //    @PatchMapping("/{commentId}")
     @PatchMapping("/{commentId}")
-    public ResponseEntity<CommentFullDto> updateComment(@PathVariable Long userId, @PathVariable Long eventId,
+    public ResponseEntity<CommentFullDto> updateComment(@PathVariable Long userId,
+                                                        @PathVariable Long eventId,
                                                         @PathVariable Long commentId,
                                                         @Valid @RequestBody UpdCommentDto updDto) {
-        log.debug("Метод updateComment(); updCommentDto={}", updDto);
+        log.info("Метод updateComment(); updCommentDto={}", updDto);
 
         CommentFullDto result = serviceService.update(userId, commentId, updDto);
         return ResponseEntity.ok(result);
     }
-
 
 
 }

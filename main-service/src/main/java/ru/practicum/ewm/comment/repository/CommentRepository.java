@@ -7,5 +7,5 @@ import ru.practicum.ewm.comment.model.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-
+    boolean existsByIdAndAuthorId(Long commentId, Long authorId);
 }

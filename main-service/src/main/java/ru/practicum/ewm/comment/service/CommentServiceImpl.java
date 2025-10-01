@@ -28,43 +28,45 @@ public class CommentServiceImpl implements CommentService {
     // ...
 
 
-
     // Public API:
     // ...
 
 
-
     // Private API:
-    // ...
     @Override
     public void delete(Long userId, Long commentId) {
-        log.debug("Метод delete(); userId={}, commentId={}", userId, commentId);
+        log.info("Метод delete(); userId={}, commentId={}", userId, commentId);
 
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + commentId + " не найден"));
-
-        if (!comment.getAuthor().getId().equals(userId)) {
-            throw new ConflictException("Пользователь не является автором комментария");
-        }
+        this.checkExistsUserAndComment(userId, commentId);
 
         commentRepository.deleteById(commentId);
     }
 
     @Override
     public CommentFullDto update(Long userId, Long commentId, UpdCommentDto updDto) {
-        log.debug("Метод update(); userId={}, commentId={}, dto: {}", userId, commentId, updDto);
+        log.info("Метод update(); userId={}, commentId={}, dto: {}", userId, commentId, updDto);
 
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с id=" + commentId + " не найден"));
+        this.checkExistsUserAndComment(userId, commentId);
 
-        if (!comment.getAuthor().getId().equals(userId)) {
-            throw new ConflictException("Пользователь не является автором комментария");
-        }
-
-        comment.setAnnotation(updDto.getAnnotation());
-        comment.setText(updDto.getText());
+        Comment comment = commentRepository.findById(commentId).get();
+        commentMapper.updateFromDto(updDto, comment);
         comment = commentRepository.save(comment);
 
         return commentMapper.toFullDto(comment);
+    }
+
+    private void checkExistsUserAndComment(Long userId, Long commentId) {
+        log.info("Метод checkExistsUserAndComment(); userId={}, commentId={}", userId, commentId);
+
+        if (!commentRepository.existsByIdAndAuthorId(userId, commentId)) {
+            if (!userRepository.existsById(userId)) {
+                throw new NotFoundException("User id={}, не существует", userId);
+            } else if (!commentRepository.existsById(commentId)) {
+                throw new NotFoundException("Comment id={}, ");
+            } else {
+                throw new ConflictException("Пользователь не является автором комментария; " +
+                        "userId={}, commentId={}", userId, commentId);
+            }
+        }
     }
 }
