@@ -12,12 +12,12 @@ import ru.practicum.ewm.comment.service.CommentService;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/events/{eventId}/comment/{commentId}/cancel")
+@RequestMapping("/admin/events/{eventId}/comments/{commentId}")
 public class AdminCommentController {
 
     private final CommentService serviceService;
 
-    @PatchMapping
+    @PatchMapping("/hide")
     public ResponseEntity<CommentPublicDto> patchComment(@PathVariable Long eventId,
                                                          @PathVariable Long commentId) {
         log.info("Метод patchComment(); eventId={}, commentId={}", eventId, commentId);
@@ -25,8 +25,4 @@ public class AdminCommentController {
         CommentPublicDto result = serviceService.cancelComment(eventId, commentId);
         return ResponseEntity.ok(result);
     }
-
-//    сделать комментарий непубличным (установить статус HIDE)
-//    @PatchMapping("/cancelled")
-
 }

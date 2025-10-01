@@ -9,5 +9,5 @@ public interface CommentService {
 
     CommentPublicDto cancelComment(Long eventId, Long commentId);
 
-    List<CommentFullDto> getUserCommentsForEvent(Long userId, Long eventId);
+    List<CommentFullDto> getAllBy(Long userId, Long eventId);
 }

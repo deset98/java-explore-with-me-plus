@@ -14,7 +14,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user/{userId}/events/{eventId}/comments")
+@RequestMapping("/users/{userId}/events/{eventId}/comments")
 public class PrivateCommentController {
 
     private final CommentService serviceService;
@@ -25,11 +25,11 @@ public class PrivateCommentController {
 
 
     @GetMapping
-    public ResponseEntity<List<CommentFullDto>> getCommentsByUserId(@PathVariable Long userId,
+    public ResponseEntity<List<CommentFullDto>> getCommentsBy(@PathVariable Long userId,
                                                                     @PathVariable Long eventId) {
         log.info("Метод getCommentsByUserId(); userId={} eventId={}", userId, eventId);
 
-        List<CommentFullDto> result = serviceService.getUserCommentsForEvent(userId, eventId);
+        List<CommentFullDto> result = serviceService.getAllBy(userId, eventId);
         return ResponseEntity.ok(result);
     }
 

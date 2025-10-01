@@ -45,7 +45,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentFullDto> getUserCommentsForEvent(Long userId, Long eventId) {
+    public List<CommentFullDto> getAllBy(Long userId, Long eventId) {
         log.info("Метод getUserCommentsForEvent(); eventId={}; commentId={}", userId, eventId);
 
         List<Comment> comments = commentRepository.findAllByEventIdAndAuthorId(eventId, userId);
