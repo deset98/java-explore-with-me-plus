@@ -1,10 +1,9 @@
 package ru.practicum.ewm.comment.service;
 
 import ru.practicum.ewm.comment.dto.CommentFullDto;
-import ru.practicum.ewm.comment.dto.UpdCommentDto;
-
 import ru.practicum.ewm.comment.dto.CommentPublicDto;
 import ru.practicum.ewm.comment.dto.NewCommentDto;
+import ru.practicum.ewm.comment.dto.UpdCommentDto;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ public interface CommentService {
 
     CommentFullDto add(NewCommentDto dto, Long eventId, Long userId);
 
-    CommentPublicDto cancelComment(Long eventId, Long commentId);
+    CommentFullDto hide(Long eventId, Long commentId, boolean published);
 
     void delete(Long userId, Long commentId);
 

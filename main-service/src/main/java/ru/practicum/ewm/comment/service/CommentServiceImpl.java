@@ -31,8 +31,8 @@ public class CommentServiceImpl implements CommentService {
 
     // Admin API:
     @Override
-    public CommentPublicDto cancelComment(Long eventId, Long commentId) {
-        log.info("Метод cancelComment(); eventId={}; commentId={}", eventId, commentId);
+    public CommentFullDto hide(Long eventId, Long commentId, boolean published) {
+        log.info("Метод hide(); eventId={}; commentId={}", eventId, commentId);
 
         if (!commentRepository.existsByIdAndEventId(commentId, eventId)) {
             throw new ConflictException("Комментарий не принадлежит указанному событию; eventId={}; commentId={}",
@@ -41,10 +41,14 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment id={} не найден", commentId));
-        comment.setState(CommentState.HIDE);
+        if (published) {
+            comment.setState(CommentState.PUBLIC);
+        } else {
+            comment.setState(CommentState.HIDE);
+        }
         comment = commentRepository.save(comment);
 
-        return commentMapper.toPublicDto(comment);
+        return commentMapper.toFullDto(comment);
     }
 
 
@@ -114,14 +118,15 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.toFullDto(comment);
     }
 
+
     private void checkExistsUserAndComment(Long userId, Long commentId) {
         log.info("Метод checkExistsUserAndComment(); userId={}, commentId={}", userId, commentId);
 
-        if (!commentRepository.existsByIdAndAuthorId(userId, commentId)) {
+        if (!commentRepository.existsByIdAndAuthorId(commentId, userId)) {
             if (!userRepository.existsById(userId)) {
                 throw new NotFoundException("User id={}, не существует", userId);
             } else if (!commentRepository.existsById(commentId)) {
-                throw new NotFoundException("Comment id={}, ");
+                throw new NotFoundException("Comment id={}, не существует", commentId);
             } else {
                 throw new ConflictException("Пользователь не является автором комментария; " +
                         "userId={}, commentId={}", userId, commentId);
