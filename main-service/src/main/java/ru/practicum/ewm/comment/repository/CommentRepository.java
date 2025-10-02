@@ -9,6 +9,9 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
+    List<Comment> findAllByEventIdAndAuthorId(Long eventId, Long userId);
+
     List<Comment> findByEventId(Long eventId);
 
+    boolean existsByIdAndEventId(Long id, Long eventId);
 }

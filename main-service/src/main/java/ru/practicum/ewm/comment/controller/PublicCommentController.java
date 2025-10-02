@@ -22,7 +22,6 @@ public class PublicCommentController {
 
     private final CommentService commentService;
 
-
     @GetMapping
     public ResponseEntity<List<CommentPublicDto>> getComments(@PathVariable Long eventId) {
         log.info("Метод getComments(); eventId={}", eventId);
@@ -30,4 +29,5 @@ public class PublicCommentController {
         List<CommentPublicDto> result = commentService.getAllBy(eventId);
         return ResponseEntity.ok(result);
     }
+
 }

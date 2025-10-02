@@ -8,6 +8,7 @@ import ru.practicum.ewm.comment.dto.CommentPublicDto;
 import ru.practicum.ewm.comment.dto.NewCommentDto;
 import ru.practicum.ewm.comment.mapper.CommentMapper;
 import ru.practicum.ewm.comment.model.Comment;
+import ru.practicum.ewm.comment.model.CommentState;
 import ru.practicum.ewm.comment.repository.CommentRepository;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
@@ -28,7 +29,23 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
 
     // Admin API:
-    // ...
+    @Override
+    public CommentPublicDto cancelComment(Long eventId, Long commentId) {
+        log.info("Метод cancelComment(); eventId={}; commentId={}", eventId, commentId);
+
+        if (!commentRepository.existsByIdAndEventId(commentId, eventId)) {
+            throw new ConflictException("Комментарий не принадлежит указанному событию; eventId={}; commentId={}",
+                    eventId, commentId);
+        }
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment id={} не найден", commentId));
+        comment.setState(CommentState.HIDE);
+        comment = commentRepository.save(comment);
+
+        return commentMapper.toPublicDto(comment);
+    }
+
 
 
     // Public API:
@@ -42,6 +59,7 @@ public class CommentServiceImpl implements CommentService {
                 .map(commentMapper::toPublicDto)
                 .toList();
     }
+
 
 
     // Private API:
@@ -63,6 +81,18 @@ public class CommentServiceImpl implements CommentService {
 
         return commentMapper.toFullDto(comment);
     }
+
+    @Override
+    public List<CommentFullDto> getAllBy(Long userId, Long eventId) {
+        log.info("Метод getUserCommentsForEvent(); eventId={}; commentId={}", userId, eventId);
+
+        List<Comment> comments = commentRepository.findAllByEventIdAndAuthorId(eventId, userId);
+
+        return comments.stream()
+                .map(commentMapper::toFullDto)
+                .toList();
+    }
+
 
 
 }

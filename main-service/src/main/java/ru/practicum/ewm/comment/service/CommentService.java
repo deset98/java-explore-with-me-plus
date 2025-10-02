@@ -10,5 +10,9 @@ public interface CommentService {
 
     List<CommentPublicDto> getAllBy(Long eventId);
 
+    List<CommentFullDto> getAllBy(Long userId, Long eventId);
+
     CommentFullDto add(NewCommentDto dto, Long eventId, Long userId);
+
+    CommentPublicDto cancelComment(Long eventId, Long commentId);
 }
