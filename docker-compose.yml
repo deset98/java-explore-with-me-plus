@@ -22,8 +22,8 @@ services:
       - POSTGRES_PASSWORD=stats
 
   evm-service:
-    build: ./main-service
-    container_name: evm-main-service
+    build: ./evm-service
+    container_name: evm-service
     ports:
       - "8080:8080"
     depends_on:
