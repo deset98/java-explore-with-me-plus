@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdCommentDto {
 
-    // userId и eventId из path
-
     @Size(min = 1, max = 300)
     private String annotation;
 

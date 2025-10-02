@@ -29,5 +29,4 @@ public class PublicCommentController {
         List<CommentPublicDto> result = commentService.getAllBy(eventId);
         return ResponseEntity.ok(result);
     }
-
 }

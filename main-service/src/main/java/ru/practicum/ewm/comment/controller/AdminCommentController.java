@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.CommentFullDto;
-import ru.practicum.ewm.comment.dto.CommentPublicDto;
 import ru.practicum.ewm.comment.service.CommentService;
 
 @Slf4j
@@ -20,8 +19,8 @@ public class AdminCommentController {
 
     @PatchMapping
     public ResponseEntity<CommentFullDto> patchComment(@PathVariable Long eventId,
-                                                         @PathVariable Long commentId,
-                                                         @RequestParam boolean published) {
+                                                       @PathVariable Long commentId,
+                                                       @RequestParam boolean published) {
         log.info("Метод patchComment(); eventId={}, commentId={}", eventId, commentId);
 
         CommentFullDto result = serviceService.hide(eventId, commentId, published);
