@@ -1,16 +1,19 @@
 package ru.practicum.ewm;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatDto {
+public class StatsDto {
+
     private String app;
+
     private String uri;
+
     private long hits;
 }
