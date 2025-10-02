@@ -21,7 +21,7 @@ services:
       - POSTGRES_USER=stats
       - POSTGRES_PASSWORD=stats
 
-  main-service:
+  evm-service:
     build: ./main-service
     container_name: evm-main-service
     ports:
