@@ -1,6 +1,7 @@
 services:
   stats-server:
-    build: ./stats/stats-server
+    build: stats/stats-server
+    image: stats-server
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -21,9 +22,10 @@ services:
       - POSTGRES_USER=stats
       - POSTGRES_PASSWORD=stats
 
-  main-service:
-    build: ./main-service
-    container_name: evm-main-service
+  ewm-service:
+    build: main-service
+    image: main-service
+    container_name: main-service
     ports:
       - "8080:8080"
     depends_on:
